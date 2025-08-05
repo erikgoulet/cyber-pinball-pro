@@ -44,9 +44,9 @@ export class UIDisplay {
         ctx.save();
         ctx.translate(x, y);
         
-        // Draw inactive segments
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-        ctx.lineWidth = 3;
+        // Draw inactive segments with better visibility
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.lineWidth = 4;
         segments.forEach(segment => {
             ctx.beginPath();
             ctx.moveTo(segment[0][0], segment[0][1]);
@@ -54,13 +54,13 @@ export class UIDisplay {
             ctx.stroke();
         });
         
-        // Draw active segments
+        // Draw active segments with thicker lines
         ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 5;
         
         if (glow) {
             ctx.shadowColor = color;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 15;
         }
         
         const activeSegments = digitSegments[digit] || [];
@@ -87,23 +87,29 @@ export class UIDisplay {
     }
     
     draw(ctx) {
-        // Background panel
-        ctx.fillStyle = 'rgba(0, 20, 40, 0.8)';
-        ctx.fillRect(10, 10, 380, 80);
+        // Background panel with darker background for better contrast
+        ctx.fillStyle = 'rgba(0, 10, 20, 0.95)';
+        ctx.fillRect(10, 10, 380, 90);
         
-        // Border
+        // Double border for better visibility
         ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(10, 10, 380, 80);
+        ctx.lineWidth = 3;
+        ctx.strokeRect(10, 10, 380, 90);
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(8, 8, 384, 94);
         
-        // Title with glow
+        // Title with enhanced glow and larger font
         ctx.save();
-        ctx.font = 'bold 24px "Courier New"';
+        ctx.font = 'bold 28px "Courier New"';
         ctx.textAlign = 'center';
         ctx.fillStyle = '#00ffff';
         ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 15;
-        ctx.fillText('CYBER PINBALL PRO', 200, 35);
+        ctx.shadowBlur = 20;
+        ctx.fillText('CYBER PINBALL PRO', 200, 38);
+        // Add inner glow
+        ctx.shadowBlur = 8;
+        ctx.fillText('CYBER PINBALL PRO', 200, 38);
         ctx.restore();
         
         // Score section
@@ -120,18 +126,22 @@ export class UIDisplay {
     }
     
     drawScoreSection(ctx) {
-        // Label
-        ctx.font = '12px "Courier New"';
+        // Label with shadow
+        ctx.save();
+        ctx.font = 'bold 14px "Courier New"';
         ctx.fillStyle = '#00ff00';
+        ctx.shadowColor = '#00ff00';
+        ctx.shadowBlur = 8;
         ctx.textAlign = 'left';
-        ctx.fillText('SCORE', 30, 60);
+        ctx.fillText('SCORE', 30, 62);
+        ctx.restore();
         
-        // Score with animation
+        // Score with animation and larger size
         const displayScore = this.game.score;
         const isAnimating = this.scoreAnimationTime > 0;
         const scoreColor = isAnimating ? '#00ff00' : '#00ff00';
         
-        this.drawLCDText(ctx, displayScore.toString().padStart(7, '0'), 30, 65, 8, scoreColor, isAnimating);
+        this.drawLCDText(ctx, displayScore.toString().padStart(7, '0'), 30, 67, 10, scoreColor, isAnimating);
         
         // Score change indicator
         if (this.scoreChangeAmount > 0 && this.scoreAnimationTime > 0) {
@@ -145,16 +155,20 @@ export class UIDisplay {
     }
     
     drawBallsSection(ctx) {
-        // Label
-        ctx.font = '12px "Courier New"';
+        // Label with shadow
+        ctx.save();
+        ctx.font = 'bold 14px "Courier New"';
         ctx.fillStyle = '#ffff00';
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = 8;
         ctx.textAlign = 'center';
-        ctx.fillText('BALLS', 200, 60);
+        ctx.fillText('BALLS', 200, 62);
+        ctx.restore();
         
-        // Draw ball indicators
-        const ballRadius = 6;
-        const startX = 175;
-        const y = 75;
+        // Draw ball indicators - larger and more visible
+        const ballRadius = 8;
+        const startX = 173;
+        const y = 77;
         
         for (let i = 0; i < 3; i++) {
             ctx.beginPath();
@@ -163,28 +177,32 @@ export class UIDisplay {
             if (i < this.game.ballsLeft) {
                 ctx.fillStyle = '#00ffff';
                 ctx.shadowColor = '#00ffff';
-                ctx.shadowBlur = 10;
+                ctx.shadowBlur = 15;
                 ctx.fill();
                 ctx.shadowBlur = 0;
             } else {
-                ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
                 ctx.stroke();
             }
         }
     }
     
     drawHighScoreSection(ctx) {
-        // Label
-        ctx.font = '12px "Courier New"';
+        // Label with shadow
+        ctx.save();
+        ctx.font = 'bold 14px "Courier New"';
         ctx.fillStyle = '#ff00ff';
+        ctx.shadowColor = '#ff00ff';
+        ctx.shadowBlur = 8;
         ctx.textAlign = 'right';
-        ctx.fillText('HIGH', 370, 60);
+        ctx.fillText('HIGH', 370, 62);
+        ctx.restore();
         
-        // High score
+        // High score with larger size
         const highScore = this.game.highScore;
-        const xPos = 280;
-        this.drawLCDText(ctx, highScore.toString().padStart(6, '0'), xPos, 65, 7, '#ff00ff', false);
+        const xPos = 270;
+        this.drawLCDText(ctx, highScore.toString().padStart(6, '0'), xPos, 67, 9, '#ff00ff', false);
     }
     
     drawExtraBallProgress(ctx) {
@@ -194,17 +212,17 @@ export class UIDisplay {
             
             // Progress bar background
             ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-            ctx.fillRect(30, 85, 340, 3);
+            ctx.fillRect(30, 93, 340, 4);
             
             // Progress bar fill
             ctx.fillStyle = '#00ffff';
-            ctx.fillRect(30, 85, 340 * progress, 3);
+            ctx.fillRect(30, 93, 340 * progress, 4);
             
             // Glow effect at the end
             if (progress < 1) {
                 ctx.shadowColor = '#00ffff';
                 ctx.shadowBlur = 5;
-                ctx.fillRect(30 + 340 * progress - 2, 84, 4, 5);
+                ctx.fillRect(30 + 340 * progress - 2, 92, 4, 6);
                 ctx.shadowBlur = 0;
             }
         }
