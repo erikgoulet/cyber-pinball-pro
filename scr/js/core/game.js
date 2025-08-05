@@ -6,6 +6,7 @@ import { UIDisplay } from '../ui/ui-display.js';
 import { InputManager } from './input-manager.js';
 import { ELEMENTS } from '../config/elements.js';
 import { GAME, BALL, SCORING } from '../config/constants.js';
+import { ParticleSystem } from '../effects/particle-system.js';
 
 export class Game {
     constructor(canvas) {
@@ -14,6 +15,7 @@ export class Game {
         this.uiDisplay = new UIDisplay(this);
         this.physics = new Physics();
         this.input = new InputManager();
+        this.particleSystem = new ParticleSystem();
         
         this.gameRunning = false;
         this.score = 0;
@@ -94,6 +96,30 @@ export class Game {
         this.physics.setScoreCallback((points) => {
             this.addScore(points);
         });
+        
+        this.physics.setCollisionCallback((type, x, y, element) => {
+            switch(type) {
+                case 'bumper':
+                    this.particleSystem.createSparkEffect(x, y, element.color || '#ff6600');
+                    break;
+                case 'angledBumper':
+                    const angle = Math.atan2(element.endY - element.startY, element.endX - element.startX) + Math.PI / 2;
+                    this.particleSystem.createSparkEffect(x, y, element.color || '#ff00ff', angle);
+                    break;
+                case 'target':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ffff', 0.5);
+                    break;
+                case 'spinner':
+                    this.particleSystem.createCollisionEffect(x, y, '#ffff00', 0.7);
+                    break;
+                case 'flipper':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ff00', 0.6);
+                    break;
+                case 'wall':
+                    this.particleSystem.createCollisionEffect(x, y, '#0088ff', 0.3);
+                    break;
+            }
+        });
     }
     
     start() {
@@ -142,8 +168,6 @@ export class Game {
         if (this.ball.launched) {
             // Continuous collision detection - check multiple substeps
             const steps = 5; // Increased steps for better accuracy
-            const originalX = this.ball.x;
-            const originalY = this.ball.y;
             const deltaX = this.ball.vx / steps;
             const deltaY = this.ball.vy / steps;
             
@@ -222,6 +246,9 @@ export class Game {
         
         // Update UI display
         this.uiDisplay.update();
+        
+        // Update particle system
+        this.particleSystem.update(1/60);
     }
     
     draw() {
@@ -236,6 +263,9 @@ export class Game {
         this.renderer.drawSpinners(this.elements.spinners);
         this.renderer.drawFlippers(this.flippers);
         this.renderer.drawBall(this.ball, this.input.isCharging());
+        
+        // Draw particles
+        this.particleSystem.draw(this.renderer.ctx);
         
         // Draw UI display
         this.uiDisplay.draw(this.renderer.ctx);

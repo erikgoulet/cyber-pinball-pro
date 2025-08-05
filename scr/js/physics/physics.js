@@ -4,11 +4,16 @@ export class Physics {
     constructor() {
         this.score = 0;
         this.scoreCallback = null;
+        this.collisionCallback = null;
         this.lastFlipperHit = { left: 0, right: 0 }; // Track last hit time
     }
     
     setScoreCallback(callback) {
         this.scoreCallback = callback;
+    }
+    
+    setCollisionCallback(callback) {
+        this.collisionCallback = callback;
     }
     
     addScore(points) {
@@ -39,14 +44,23 @@ export class Physics {
         if (ball.x < hardLeftBound + ball.radius) {
             ball.x = hardLeftBound + ball.radius;
             ball.vx = Math.abs(ball.vx) * 0.95;
+            if (this.collisionCallback) {
+                this.collisionCallback('wall', ball.x, ball.y, { color: '#0088ff' });
+            }
         }
         if (ball.x > hardRightBound - ball.radius) {
             ball.x = hardRightBound - ball.radius;
             ball.vx = -Math.abs(ball.vx) * 0.95;
+            if (this.collisionCallback) {
+                this.collisionCallback('wall', ball.x, ball.y, { color: '#0088ff' });
+            }
         }
         if (ball.y < hardTopBound + ball.radius) {
             ball.y = hardTopBound + ball.radius;
             ball.vy = Math.abs(ball.vy) * 0.95;
+            if (this.collisionCallback) {
+                this.collisionCallback('wall', ball.x, ball.y, { color: '#0088ff' });
+            }
         }
         
         // Check corner regions with expanded detection area
@@ -311,6 +325,10 @@ export class Physics {
             );
             
             this.addScore(SCORING.FLIPPER_HIT);
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('flipper', closestX, closestY, flipper);
+            }
         }
     }
     
@@ -337,6 +355,10 @@ export class Physics {
             
             // Visual feedback
             bumper.hit = 10;
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('bumper', ball.x, ball.y, bumper);
+            }
             
             return true;
         }
@@ -387,6 +409,18 @@ export class Physics {
             // Visual feedback
             bumper.hit = 10;
             
+            if (this.collisionCallback) {
+                const collisionX = closestX;
+                const collisionY = closestY;
+                this.collisionCallback('angledBumper', collisionX, collisionY, {
+                    ...bumper,
+                    startX: bumper.x1,
+                    startY: bumper.y1,
+                    endX: bumper.x2,
+                    endY: bumper.y2
+                });
+            }
+            
             return true;
         }
         
@@ -434,6 +468,10 @@ export class Physics {
             }
             
             this.addScore(target.points);
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('target', ball.x, ball.y, target);
+            }
             
             return true;
         }
@@ -484,6 +522,10 @@ export class Physics {
                 
                 this.addScore(SCORING.SPINNER_HIT);
                 
+                if (this.collisionCallback) {
+                    this.collisionCallback('spinner', ball.x, ball.y, spinner);
+                }
+                
                 return true;
             }
         }
@@ -501,15 +543,6 @@ export class Physics {
         const dist = Math.sqrt((ball.x - closestX) ** 2 + (ball.y - closestY) ** 2);
         
         if (dist < ball.radius + ramp.width / 2) {
-            // Calculate ramp normal (perpendicular to ramp direction)
-            const rampDx = ramp.x2 - ramp.x1;
-            const rampDy = ramp.y2 - ramp.y1;
-            const rampLength = Math.sqrt(rampDx * rampDx + rampDy * rampDy);
-            
-            // Normalized ramp direction
-            const rampDirX = rampDx / rampLength;
-            const rampDirY = rampDy / rampLength;
-            
             // Normal perpendicular to ramp (pointing away from closest point)
             const normalX = (ball.x - closestX) / dist;
             const normalY = (ball.y - closestY) / dist;
