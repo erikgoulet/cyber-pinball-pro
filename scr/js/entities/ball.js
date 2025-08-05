@@ -26,6 +26,10 @@ export class Ball {
             this.vy = (this.vy / speed) * PHYSICS.MAX_VELOCITY;
         }
         
+        // NOTE: Position update moved to after collision detection
+    }
+    
+    updatePosition() {
         // Update position
         this.x += this.vx;
         this.y += this.vy;
@@ -39,7 +43,9 @@ export class Ball {
     
     launch(power) {
         this.vy = -power;
-        this.vx = (Math.random() - 0.5) * 2;
+        // Increased horizontal randomness for more varied launches
+        // Range: -4 to +4 (was -1 to +1)
+        this.vx = (Math.random() - 0.5) * 8;
         this.launched = true;
     }
     

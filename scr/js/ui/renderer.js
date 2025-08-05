@@ -36,25 +36,66 @@ export class Renderer {
         this.ctx.strokeStyle = COLORS.PRIMARY;
         this.ctx.lineWidth = 3;
         
-        // Left wall
-        this.ctx.beginPath();
-        this.ctx.moveTo(15, GAME.TOP_WALL_Y);
-        this.ctx.lineTo(15, 650);
-        this.ctx.lineTo(100, 730);
-        this.ctx.stroke();
+        // Draw curved corners and walls as one continuous path
+        const cornerRadius = 35;
+        const topY = GAME.TOP_WALL_Y;
         
-        // Right wall
         this.ctx.beginPath();
-        this.ctx.moveTo(385, GAME.TOP_WALL_Y);
-        this.ctx.lineTo(385, 650);
-        this.ctx.lineTo(300, 730);
-        this.ctx.stroke();
+        
+        // Start at bottom left of left flipper area
+        this.ctx.moveTo(100, 730);
+        
+        // Left wall up to where curve starts
+        this.ctx.lineTo(15, 650);
+        this.ctx.lineTo(15, topY + cornerRadius);
+        
+        // Top left curved corner
+        this.ctx.arc(15 + cornerRadius, topY + cornerRadius, cornerRadius, Math.PI, Math.PI * 1.5, false);
         
         // Top wall
-        this.ctx.beginPath();
-        this.ctx.moveTo(15, GAME.TOP_WALL_Y);
-        this.ctx.lineTo(385, GAME.TOP_WALL_Y);
+        this.ctx.lineTo(385 - cornerRadius, topY);
+        
+        // Top right curved corner
+        this.ctx.arc(385 - cornerRadius, topY + cornerRadius, cornerRadius, Math.PI * 1.5, 0, false);
+        
+        // Right wall down to flipper area
+        this.ctx.lineTo(385, 650);
+        this.ctx.lineTo(300, 730);
+        
         this.ctx.stroke();
+        
+        // Debug: Draw corner collision zones
+        if (false) { // Change to true to see debug visualization
+            this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            this.ctx.lineWidth = 1;
+            
+            // Show the actual corner centers used in physics
+            const leftCornerX = 15 + cornerRadius;
+            const leftCornerY = topY + cornerRadius;
+            const rightCornerX = 385 - cornerRadius;
+            const rightCornerY = topY + cornerRadius;
+            
+            // Left corner center
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillRect(leftCornerX - 2, leftCornerY - 2, 4, 4);
+            
+            // Right corner center
+            this.ctx.fillRect(rightCornerX - 2, rightCornerY - 2, 4, 4);
+            
+            // Show collision radius
+            this.ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            this.ctx.beginPath();
+            this.ctx.arc(leftCornerX, leftCornerY, cornerRadius - 8, 0, Math.PI * 2);
+            this.ctx.stroke();
+            
+            this.ctx.beginPath();
+            this.ctx.arc(rightCornerX, rightCornerY, cornerRadius - 8, 0, Math.PI * 2);
+            this.ctx.stroke();
+            
+            // Show the corner detection regions
+            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.2)';
+            this.ctx.fillRect(rightCornerX - 5, 0, 100, rightCornerY + 5);
+        }
     }
     
     drawLauncherChute(ball, charging, chargePower) {

@@ -18,4 +18,184 @@ body {
   touch-action: none;
 }
 
-/* ... (copy all CSS from the original file) ... */
+#gameContainer {
+  position: relative;
+  width: 400px;
+  height: 800px;
+  background: #111;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 20px #0ff;
+}
+
+#gameCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#title {
+  font-size: 20px;
+  color: #0ff;
+  text-align: center;
+  text-shadow: 0 0 10px #0ff;
+  margin-bottom: 10px;
+}
+
+.score-info {
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  font-size: 14px;
+}
+
+.score-info span {
+  text-shadow: 0 0 5px currentColor;
+}
+
+#score {
+  color: #0f0;
+}
+
+#balls {
+  color: #ff0;
+}
+
+#highScore {
+  color: #f0f;
+}
+
+.control-btn {
+  position: absolute;
+  background: rgba(0, 255, 255, 0.2);
+  border: 2px solid #0ff;
+  color: #0ff;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 15px 20px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.1s;
+  z-index: 20;
+}
+
+.control-btn:active {
+  background: rgba(0, 255, 255, 0.5);
+  transform: scale(0.95);
+}
+
+#leftBtn {
+  bottom: 20px;
+  left: 20px;
+}
+
+#rightBtn {
+  bottom: 20px;
+  right: 20px;
+}
+
+#launchBtn {
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#powerMeter {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #0ff;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#powerMeter.active {
+  opacity: 1;
+}
+
+#powerBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #0f0, #ff0, #f00);
+  transition: width 0.1s;
+}
+
+#menu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 40px;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 20px #0ff;
+}
+
+#menu h1 {
+  color: #0ff;
+  font-size: 32px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px #0ff;
+}
+
+#startBtn {
+  background: #0ff;
+  color: #000;
+  border: none;
+  padding: 15px 40px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+}
+
+#startBtn:hover {
+  background: #fff;
+  box-shadow: 0 0 20px #0ff;
+}
+
+#instructions {
+  color: #aaa;
+  font-size: 14px;
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 500px) {
+  #gameContainer {
+    width: 100vw;
+    height: 100vh;
+    max-width: 400px;
+    max-height: 800px;
+    border: none;
+  }
+  
+  .control-btn {
+    font-size: 20px;
+    padding: 10px 15px;
+  }
+}

@@ -1,8 +1,8 @@
-import { Ball } from '../entities/Ball.js';
-import { Flipper } from '../entities/Flipper.js';
-import { Physics } from '../physics/Physics.js';
-import { Renderer } from '../ui/Renderer.js';
-import { InputManager } from './InputManager.js';
+import { Ball } from '../entities/ball.js';
+import { Flipper } from '../entities/flipper.js';
+import { Physics } from '../physics/physics.js';
+import { Renderer } from '../ui/renderer.js';
+import { InputManager } from './input-manager.js';
 import { ELEMENTS } from '../config/elements.js';
 import { GAME, BALL, SCORING } from '../config/constants.js';
 
@@ -17,6 +17,11 @@ export class Game {
         this.score = 0;
         this.ballsLeft = GAME.INITIAL_BALLS;
         this.highScore = parseInt(localStorage.getItem('pinballHighScore') || '0');
+        
+        // Extra ball tracking
+        this.extraBallThresholds = [10000, 25000, 50000, 100000]; // Score milestones
+        this.nextExtraBallIndex = 0;
+        this.extraBallsEarned = 0;
         
         this.ball = new Ball();
         this.flippers = {
@@ -87,6 +92,11 @@ export class Game {
         this.gameRunning = true;
         this.ballsLeft = GAME.INITIAL_BALLS;
         this.score = 0;
+        
+        // Reset extra ball tracking
+        this.nextExtraBallIndex = 0;
+        this.extraBallsEarned = 0;
+        
         this.updateUI();
         this.resetBall();
     }
@@ -114,35 +124,54 @@ export class Game {
         this.flippers.left.update();
         this.flippers.right.update();
         
-        // Update ball
+        // Update ball physics (velocity only, not position)
         this.ball.update();
         
         if (this.ball.launched) {
-            // Check collisions
-            this.physics.checkWalls(this.ball);
-            this.physics.checkFlipperCollision(this.ball, this.flippers.left, true);
-            this.physics.checkFlipperCollision(this.ball, this.flippers.right, false);
+            // Continuous collision detection - check multiple substeps
+            const steps = 5; // Increased steps for better accuracy
+            const originalX = this.ball.x;
+            const originalY = this.ball.y;
+            const deltaX = this.ball.vx / steps;
+            const deltaY = this.ball.vy / steps;
             
-            // Check element collisions
-            this.elements.bumpers.forEach(bumper => {
-                this.physics.checkBumperCollision(this.ball, bumper);
-            });
+            for (let i = 0; i < steps; i++) {
+                // Move ball a fraction of its velocity
+                this.ball.x += deltaX;
+                this.ball.y += deltaY;
+                
+                // Check collisions at this position
+                this.physics.checkWalls(this.ball);
+                this.physics.checkFlipperCollision(this.ball, this.flippers.left, true);
+                this.physics.checkFlipperCollision(this.ball, this.flippers.right, false);
+                
+                // Check element collisions
+                this.elements.bumpers.forEach(bumper => {
+                    this.physics.checkBumperCollision(this.ball, bumper);
+                });
+                
+                this.elements.angledBumpers.forEach(bumper => {
+                    this.physics.checkAngledBumperCollision(this.ball, bumper);
+                });
+                
+                this.elements.targets.forEach(target => {
+                    this.physics.checkTargetCollision(this.ball, target);
+                });
+                
+                this.elements.spinners.forEach(spinner => {
+                    this.physics.checkSpinnerCollision(this.ball, spinner);
+                });
+                
+                this.elements.ramps.forEach(ramp => {
+                    this.physics.checkRampCollision(this.ball, ramp);
+                });
+            }
             
-            this.elements.angledBumpers.forEach(bumper => {
-                this.physics.checkAngledBumperCollision(this.ball, bumper);
-            });
-            
-            this.elements.targets.forEach(target => {
-                this.physics.checkTargetCollision(this.ball, target);
-            });
-            
-            this.elements.spinners.forEach(spinner => {
-                this.physics.checkSpinnerCollision(this.ball, spinner);
-            });
-            
-            this.elements.ramps.forEach(ramp => {
-                this.physics.checkRampCollision(this.ball, ramp);
-            });
+            // Update trail with final position
+            this.ball.trail.push({ x: this.ball.x, y: this.ball.y });
+            if (this.ball.trail.length > BALL.TRAIL_LENGTH) {
+                this.ball.trail.shift();
+            }
             
             // Check if ball is lost
             if (this.ball.y > GAME.BALL_LOST_Y) {
@@ -199,7 +228,66 @@ export class Game {
     
     addScore(points) {
         this.score += points;
+        
+        // Check for extra ball reward
+        if (this.nextExtraBallIndex < this.extraBallThresholds.length) {
+            if (this.score >= this.extraBallThresholds[this.nextExtraBallIndex]) {
+                this.awardExtraBall();
+                this.nextExtraBallIndex++;
+            }
+        }
+        
         this.updateUI();
+    }
+    
+    awardExtraBall() {
+        this.ballsLeft++;
+        this.extraBallsEarned++;
+        
+        // Visual feedback for extra ball
+        this.showExtraBallMessage();
+        
+        // Play a sound or animation (future enhancement)
+        console.log(`EXTRA BALL! Total earned: ${this.extraBallsEarned}`);
+    }
+    
+    showExtraBallMessage() {
+        // Create temporary message element
+        const message = document.createElement('div');
+        message.textContent = 'EXTRA BALL!';
+        message.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #0ff;
+            text-shadow: 0 0 20px #0ff;
+            z-index: 1000;
+            animation: pulse 2s ease-out;
+            pointer-events: none;
+        `;
+        
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+                50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add to game container
+        document.getElementById('gameContainer').appendChild(message);
+        
+        // Remove after animation
+        setTimeout(() => {
+            message.remove();
+            style.remove();
+        }, 2000);
     }
     
     updateUI() {

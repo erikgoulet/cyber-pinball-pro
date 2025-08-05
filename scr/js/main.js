@@ -1,4 +1,4 @@
-import { Game } from './core/Game.js';
+import { Game } from './core/game.js';
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', () => {

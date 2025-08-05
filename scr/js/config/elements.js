@@ -1,5 +1,23 @@
 // Game element definitions
 export const ELEMENTS = {
+    // Curved corners for smooth ball flow
+    corners: [
+        {
+            // Top left corner
+            x: 15,
+            y: 50,
+            radius: 35,
+            type: 'outer' // Ball bounces off the outside of the curve
+        },
+        {
+            // Top right corner
+            x: 385,
+            y: 50,
+            radius: 35,
+            type: 'outer'
+        }
+    ],
+    
     bumpers: [
         { x: 150, y: 250, radius: 30, power: 10, color: '#ff6600' },
         { x: 250, y: 230, radius: 30, power: 10, color: '#ff6600' },

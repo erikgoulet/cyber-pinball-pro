@@ -1,7 +1,7 @@
 // Physics constants
 export const PHYSICS = {
     GRAVITY: 0.4,
-    DAMPING: 0.985,
+    DAMPING: 0.995,
     MAX_VELOCITY: 25,
     FLIPPER_POWER: 20,
     FLIPPER_BASE_POWER: 8
@@ -28,7 +28,7 @@ export const BALL = {
 export const GAME = {
     INITIAL_BALLS: 3,
     BALL_LOST_Y: 820,
-    TOP_WALL_Y: 120
+    TOP_WALL_Y: 50
 };
 
 // Colors
