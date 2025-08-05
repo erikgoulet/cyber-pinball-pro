@@ -17,6 +17,7 @@ export class Game {
         this.score = 0;
         this.ballsLeft = GAME.INITIAL_BALLS;
         this.highScore = parseInt(localStorage.getItem('pinballHighScore') || '0');
+        this.waitingForNextBall = false;
         
         // Extra ball tracking
         this.extraBallThresholds = [10000, 25000, 50000, 100000]; // Score milestones
@@ -72,8 +73,14 @@ export class Game {
                 const power = BALL.LAUNCH_MIN_POWER + (clampedTime / BALL.MAX_CHARGE_TIME) * (BALL.LAUNCH_MAX_POWER - BALL.LAUNCH_MIN_POWER);
                 this.ball.launch(power);
                 
+                // Decrement balls when launching
+                this.ballsLeft--;
+                
                 // Reset power meter
                 document.getElementById('powerBar').style.width = '0%';
+                
+                // Update UI to show balls remaining
+                this.updateUI();
             }
         });
         
@@ -109,6 +116,9 @@ export class Game {
         
         // Reset angled bumper animations
         this.elements.angledBumpers.forEach(bumper => bumper.hit = 0);
+        
+        // Update UI since ball.launched is now false
+        this.updateUI();
     }
     
     update() {
@@ -174,12 +184,13 @@ export class Game {
             }
             
             // Check if ball is lost
-            if (this.ball.y > GAME.BALL_LOST_Y) {
-                this.ballsLeft--;
-                this.updateUI();
-                
+            if (this.ball.y > GAME.BALL_LOST_Y && !this.waitingForNextBall) {
                 if (this.ballsLeft > 0) {
-                    setTimeout(() => this.resetBall(), 1000);
+                    this.waitingForNextBall = true;
+                    setTimeout(() => {
+                        this.resetBall();
+                        this.waitingForNextBall = false;
+                    }, 1000);
                 } else {
                     this.gameOver();
                 }
@@ -221,7 +232,7 @@ export class Game {
         this.renderer.drawFlippers(this.flippers);
         this.renderer.drawBall(this.ball, this.input.isCharging());
         
-        if (this.gameRunning === false && this.ballsLeft === 0) {
+        if (this.gameRunning === false && this.ballsLeft <= 0) {
             this.renderer.drawGameOver(this.score);
         }
     }
