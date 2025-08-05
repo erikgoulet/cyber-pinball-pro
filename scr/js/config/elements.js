@@ -65,18 +65,18 @@ export const ELEMENTS = {
         left: {
             x: 100,
             y: 680,
-            angle: -0.2,
+            angle: 0.5,
             length: 70,
-            targetAngle: -0.2,
-            activeAngle: -0.8
+            targetAngle: 0.5,
+            activeAngle: -0.3
         },
         right: {
             x: 300,
             y: 680,
-            angle: Math.PI + 0.2,
+            angle: Math.PI - 0.5,
             length: 70,
-            targetAngle: Math.PI + 0.2,
-            activeAngle: Math.PI + 0.8
+            targetAngle: Math.PI - 0.5,
+            activeAngle: Math.PI + 0.3
         }
     }
 };

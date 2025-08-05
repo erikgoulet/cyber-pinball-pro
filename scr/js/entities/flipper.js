@@ -13,7 +13,7 @@ export class Flipper {
     update() {
         // Smooth angle interpolation
         this.targetAngle = this.isActive ? this.activeAngle : this.restAngle;
-        this.angle += (this.targetAngle - this.angle) * 0.3;
+        this.angle += (this.targetAngle - this.angle) * 0.7;
     }
     
     activate() {
@@ -32,6 +32,6 @@ export class Flipper {
     }
     
     getSpeed() {
-        return Math.abs(this.targetAngle - this.angle) * 20;
+        return Math.abs(this.targetAngle - this.angle) * 40;
     }
 }
