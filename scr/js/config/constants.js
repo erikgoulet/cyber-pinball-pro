@@ -2,9 +2,9 @@
 export const PHYSICS = {
     GRAVITY: 0.4,
     DAMPING: 0.995,
-    MAX_VELOCITY: 25,
-    FLIPPER_POWER: 20,
-    FLIPPER_BASE_POWER: 8
+    MAX_VELOCITY: 18.75,
+    FLIPPER_POWER: 25,
+    FLIPPER_BASE_POWER: 10
 };
 
 // Canvas dimensions
@@ -19,8 +19,8 @@ export const BALL = {
     INITIAL_X: 370,
     INITIAL_Y: 600,
     TRAIL_LENGTH: 20,
-    LAUNCH_MIN_POWER: 25,
-    LAUNCH_MAX_POWER: 60,
+    LAUNCH_MIN_POWER: 18.75,
+    LAUNCH_MAX_POWER: 45,
     MAX_CHARGE_TIME: 2500
 };
 
