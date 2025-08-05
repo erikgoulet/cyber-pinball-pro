@@ -67,3 +67,20 @@ This is a browser-based pinball game built with vanilla JavaScript and HTML5 Can
 - No external dependencies - pure vanilla JavaScript
 - Collision detection uses circle-circle and circle-line algorithms
 - State persistence through localStorage for high scores
+
+## Git Commit Guidelines
+
+When committing and pushing to Git, do NOT include the following in commit messages:
+- 🤖 Generated with [Claude Code](https://claude.ai/code)
+- Co-Authored-By: Claude <noreply@anthropic.com>
+
+### Quick Git Command: QGIT
+
+When the user types "QGIT" followed by a commit message, execute:
+1. `git add .` (stage all changes)
+2. `git commit -m "[message]"` (without Claude signatures)
+3. `git push` (push to remote)
+
+Example usage: `QGIT Fix flipper physics`
+
+This will commit and push with a clean commit message, no Claude attribution.
