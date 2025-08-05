@@ -2,6 +2,7 @@ import { Ball } from '../entities/ball.js';
 import { Flipper } from '../entities/flipper.js';
 import { Physics } from '../physics/physics.js';
 import { Renderer } from '../ui/renderer.js';
+import { UIDisplay } from '../ui/ui-display.js';
 import { InputManager } from './input-manager.js';
 import { ELEMENTS } from '../config/elements.js';
 import { GAME, BALL, SCORING } from '../config/constants.js';
@@ -10,6 +11,7 @@ export class Game {
     constructor(canvas) {
         this.canvas = canvas;
         this.renderer = new Renderer(canvas);
+        this.uiDisplay = new UIDisplay(this);
         this.physics = new Physics();
         this.input = new InputManager();
         
@@ -217,6 +219,9 @@ export class Game {
         this.elements.bumpers.forEach(bumper => {
             if (bumper.hit > 0) bumper.hit--;
         });
+        
+        // Update UI display
+        this.uiDisplay.update();
     }
     
     draw() {
@@ -231,6 +236,9 @@ export class Game {
         this.renderer.drawSpinners(this.elements.spinners);
         this.renderer.drawFlippers(this.flippers);
         this.renderer.drawBall(this.ball, this.input.isCharging());
+        
+        // Draw UI display
+        this.uiDisplay.draw(this.renderer.ctx);
         
         if (this.gameRunning === false && this.ballsLeft <= 0) {
             this.renderer.drawGameOver(this.score);
