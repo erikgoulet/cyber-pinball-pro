@@ -76,11 +76,26 @@ When committing and pushing to Git, do NOT include the following in commit messa
 
 ### Quick Git Command: QGIT
 
-When the user types "QGIT" followed by a commit message, execute:
+When the user types "QGIT":
+
+**With a message:** `QGIT Fix flipper physics`
 1. `git add .` (stage all changes)
-2. `git commit -m "[message]"` (without Claude signatures)
+2. `git commit -m "Fix flipper physics"` (without Claude signatures)
 3. `git push` (push to remote)
 
-Example usage: `QGIT Fix flipper physics`
+**Without a message:** `QGIT`
+1. Run `git status` and `git diff --staged` to analyze changes
+2. Auto-generate a commit message based on:
+   - Files modified/added/deleted
+   - Type of changes (feature, fix, update, refactor)
+   - Specific components affected
+3. `git add .` (stage all changes)
+4. `git commit -m "[auto-generated message]"` (without Claude signatures)
+5. `git push` (push to remote)
+
+Example auto-generated messages:
+- "Update game physics and flipper mechanics"
+- "Add scoring system to pinball game"
+- "Fix collision detection in ball entity"
 
 This will commit and push with a clean commit message, no Claude attribution.
