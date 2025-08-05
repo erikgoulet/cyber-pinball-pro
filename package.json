@@ -1,0 +1,23 @@
+{
+  "name": "cyber-pinball-pro",
+  "version": "1.0.0",
+  "description": "A retro-futuristic pinball game built with vanilla JavaScript",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "npx http-server -p 8000"
+  },
+  "keywords": [
+    "pinball",
+    "game",
+    "javascript",
+    "canvas",
+    "cyberpunk"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cyber-pinball-pro.git"
+  }
+}
