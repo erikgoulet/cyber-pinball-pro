@@ -1,10 +1,10 @@
-# Cyber Pinball Pro 🎮
+# Cyber Pinball Pro
 
 A retro-futuristic pinball game built with vanilla JavaScript and HTML5 Canvas. Features realistic physics, neon cyberpunk aesthetics, and smooth gameplay.
 
 ![Cyber Pinball Pro Screenshot](screenshot.png)
 
-## 🎯 Features
+## Features
 
 - **Realistic Physics Engine**: Custom 2D physics with gravity, collision detection, and momentum transfer
 - **Multiple Game Elements**: 
@@ -25,14 +25,14 @@ A retro-futuristic pinball game built with vanilla JavaScript and HTML5 Canvas. 
   - Cyberpunk color scheme
 - **Persistent High Score**: Saves your best score locally
 
-## 🎮 How to Play
+## How to Play
 
-1. **Launch**: Hold the ⚡ button (or Space key) to charge power, release to launch
+1. **Launch**: Hold the power button (or Space key) to charge power, release to launch
 2. **Flippers**: Use L/R buttons (or Arrow keys) to control flippers
 3. **Score**: Hit targets, bumpers, and ramps to score points
 4. **Goal**: Keep the ball in play and beat your high score!
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Play Online
 Visit: [https://yourusername.github.io/cyber-pinball-pro/](https://yourusername.github.io/cyber-pinball-pro/)
@@ -52,7 +52,7 @@ python -m http.server 8000
 # Then visit http://localhost:8000
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 cyber-pinball-pro/
@@ -77,7 +77,7 @@ cyber-pinball-pro/
 │           └── elements.js  # Table layout
 ```
 
-## 🛠️ Technical Details
+## Technical Details
 
 - **No Dependencies**: Pure vanilla JavaScript
 - **ES6 Modules**: Modern JavaScript architecture
@@ -85,7 +85,7 @@ cyber-pinball-pro/
 - **60 FPS**: Smooth gameplay using requestAnimationFrame
 - **Responsive**: Adapts to different screen sizes
 
-## 📝 Development
+## Development
 
 ### Adding New Features
 1. Add new element types in `src/js/config/elements.js`
@@ -102,7 +102,7 @@ cyber-pinball-pro/
 - Modify CSS in `src/css/styles.css`
 - Adjust rendering effects in `src/js/ui/Renderer.js`
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -110,16 +110,13 @@ cyber-pinball-pro/
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Inspired by classic pinball machines
 - Built with love for retro gaming
 - Cyberpunk aesthetic influenced by synthwave culture
 
----
-
-Made with ⚡ by [Your Name]
