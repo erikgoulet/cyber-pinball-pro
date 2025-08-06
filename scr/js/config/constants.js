@@ -5,13 +5,13 @@ const isMobile = getIsMobile();
 
 export const PHYSICS = {
     GRAVITY: isMobile ? 0.3 : 0.4,          // Gentler gravity on mobile
-    DAMPING: isMobile ? 0.99 : 0.995,       // More damping on mobile
-    MAX_VELOCITY: isMobile ? 12 : 18.75,    // 36% slower on mobile
+    DAMPING: isMobile ? 0.993 : 0.995,      // Slightly more damping on mobile
+    MAX_VELOCITY: isMobile ? 15 : 18.75,    // 20% slower on mobile
     FLIPPER_POWER: 25,
     FLIPPER_BASE_POWER: 10,
     // Speed zone settings for progressive slowing near flippers
-    REACTION_ZONE_Y: 0.7,                   // Start slowing at 70% down the table
-    REACTION_ZONE_FACTOR: isMobile ? 0.6 : 0.8  // Slow to 60% speed on mobile, 80% on desktop
+    REACTION_ZONE_Y: 0.8,                   // Start slowing at 80% down the table
+    REACTION_ZONE_FACTOR: isMobile ? 0.75 : 0.85  // Slow to 75% speed on mobile, 85% on desktop
 };
 
 // Canvas dimensions
@@ -26,8 +26,8 @@ export const BALL = {
     INITIAL_X: 370,
     INITIAL_Y: 600,
     TRAIL_LENGTH: 20,
-    LAUNCH_MIN_POWER: isMobile ? 12 : 18.75,   // Lower launch power on mobile
-    LAUNCH_MAX_POWER: isMobile ? 30 : 45,       // Lower max power on mobile
+    LAUNCH_MIN_POWER: isMobile ? 15 : 18.75,   // Slightly lower launch power on mobile
+    LAUNCH_MAX_POWER: isMobile ? 35 : 45,       // Moderately lower max power on mobile
     MAX_CHARGE_TIME: 2500
 };
 

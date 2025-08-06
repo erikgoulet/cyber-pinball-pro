@@ -7,7 +7,7 @@ A retro-futuristic pinball game built with vanilla JavaScript and HTML5 Canvas. 
 ## Features
 
 - **Realistic Physics Engine**: Custom 2D physics with gravity, collision detection, and momentum transfer
-- **Multiple Game Elements**: 
+- **Multiple Game Elements**:
   - 5 Bumpers with different power levels
   - 2 Slingshot bumpers
   - 4 Targets worth 500 points each
@@ -35,12 +35,14 @@ A retro-futuristic pinball game built with vanilla JavaScript and HTML5 Canvas. 
 ## Quick Start
 
 ### Play Online
-Visit: [https://yourusername.github.io/cyber-pinball-pro/](https://yourusername.github.io/cyber-pinball-pro/)
+
+Visit: [https://erikgoulet.github.io/cyber-pinball-pro/](https://erikgoulet.github.io/cyber-pinball-pro/)
 
 ### Run Locally
+
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cyber-pinball-pro.git
+git clone https://github.com/erikgoulet/cyber-pinball-pro.git
 cd cyber-pinball-pro
 
 # Open in browser
@@ -88,16 +90,19 @@ cyber-pinball-pro/
 ## Development
 
 ### Adding New Features
+
 1. Add new element types in `src/js/config/elements.js`
 2. Create entity class in `src/js/entities/`
 3. Add collision logic in `src/js/physics/Physics.js`
 4. Add rendering in `src/js/ui/Renderer.js`
 
 ### Modifying Physics
+
 - Adjust gravity and damping in `src/js/config/constants.js`
 - Modify collision responses in `src/js/physics/Physics.js`
 
 ### Changing Visuals
+
 - Update colors in `src/js/config/constants.js`
 - Modify CSS in `src/css/styles.css`
 - Adjust rendering effects in `src/js/ui/Renderer.js`
@@ -119,4 +124,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - Inspired by classic pinball machines
 - Built with love for retro gaming
 - Cyberpunk aesthetic influenced by synthwave culture
-
