@@ -29,7 +29,7 @@ export const ELEMENTS = {
     angledBumpers: [
         {
             x1: 55, y1: 610,
-            x2: 75, y2: 635,
+            x2: 95, y2: 675,
             width: 8,
             power: 6,
             color: '#ff00ff',
@@ -37,7 +37,7 @@ export const ELEMENTS = {
         },
         {
             x1: 345, y1: 610,
-            x2: 325, y2: 635,
+            x2: 305, y2: 675,
             width: 8,
             power: 6,
             color: '#ff00ff',
