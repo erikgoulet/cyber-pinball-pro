@@ -1,4 +1,4 @@
-import { BALL, PHYSICS } from '../config/constants.js';
+import { BALL, PHYSICS, CANVAS } from '../config/constants.js';
 
 export class Ball {
     constructor(x = BALL.INITIAL_X, y = BALL.INITIAL_Y) {
@@ -18,6 +18,17 @@ export class Ball {
         this.vy += PHYSICS.GRAVITY;
         this.vx *= PHYSICS.DAMPING;
         this.vy *= PHYSICS.DAMPING;
+        
+        // Progressive speed reduction in reaction zone (near flippers)
+        if (this.y > CANVAS.HEIGHT * PHYSICS.REACTION_ZONE_Y) {
+            // Apply additional slowing in the reaction zone
+            const zoneDepth = (this.y - CANVAS.HEIGHT * PHYSICS.REACTION_ZONE_Y) / 
+                            (CANVAS.HEIGHT * (1 - PHYSICS.REACTION_ZONE_Y));
+            const slowFactor = 1 - (1 - PHYSICS.REACTION_ZONE_FACTOR) * Math.min(zoneDepth, 1);
+            
+            this.vx *= slowFactor;
+            this.vy *= slowFactor;
+        }
         
         // Limit velocity
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);

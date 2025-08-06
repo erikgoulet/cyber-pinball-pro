@@ -1,10 +1,17 @@
-// Physics constants
+import { getIsMobile } from '../utils/device.js';
+
+// Physics constants - adaptive based on device
+const isMobile = getIsMobile();
+
 export const PHYSICS = {
-    GRAVITY: 0.4,
-    DAMPING: 0.995,
-    MAX_VELOCITY: 18.75,
+    GRAVITY: isMobile ? 0.3 : 0.4,          // Gentler gravity on mobile
+    DAMPING: isMobile ? 0.99 : 0.995,       // More damping on mobile
+    MAX_VELOCITY: isMobile ? 12 : 18.75,    // 36% slower on mobile
     FLIPPER_POWER: 25,
-    FLIPPER_BASE_POWER: 10
+    FLIPPER_BASE_POWER: 10,
+    // Speed zone settings for progressive slowing near flippers
+    REACTION_ZONE_Y: 0.7,                   // Start slowing at 70% down the table
+    REACTION_ZONE_FACTOR: isMobile ? 0.6 : 0.8  // Slow to 60% speed on mobile, 80% on desktop
 };
 
 // Canvas dimensions
@@ -13,14 +20,14 @@ export const CANVAS = {
     HEIGHT: 800
 };
 
-// Ball configuration
+// Ball configuration - also adaptive for mobile
 export const BALL = {
     RADIUS: 8,
     INITIAL_X: 370,
     INITIAL_Y: 600,
     TRAIL_LENGTH: 20,
-    LAUNCH_MIN_POWER: 18.75,
-    LAUNCH_MAX_POWER: 45,
+    LAUNCH_MIN_POWER: isMobile ? 12 : 18.75,   // Lower launch power on mobile
+    LAUNCH_MAX_POWER: isMobile ? 30 : 45,       // Lower max power on mobile
     MAX_CHARGE_TIME: 2500
 };
 
