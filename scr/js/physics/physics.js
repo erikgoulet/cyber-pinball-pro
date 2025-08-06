@@ -311,7 +311,7 @@ export class Physics {
             
             // Apply impulse with improved physics
             const flipperSpeed = flipper.getSpeed();
-            const power = Math.max(PHYSICS.FLIPPER_BASE_POWER, flipperSpeed * 1.2); // Reduced from 1.5
+            const power = Math.max(PHYSICS.FLIPPER_BASE_POWER, flipperSpeed * 2.0); // Increased from 1.2
             
             // Add angle-dependent power for more control
             const flipperAngle = flipper.angle;
@@ -320,8 +320,8 @@ export class Physics {
                 Math.max(0.5, Math.sin(-flipperAngle + Math.PI / 2));
             
             ball.setVelocity(
-                normalX * power * angleFactor + (isLeft ? 2 : -2), // Reduced from 3
-                normalY * power * angleFactor - 4  // Reduced from 5
+                normalX * power * angleFactor + (isLeft ? 3 : -3), // Increased from 2
+                normalY * power * angleFactor - 6  // Increased from 4
             );
             
             this.addScore(SCORING.FLIPPER_HIT);

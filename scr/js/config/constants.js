@@ -7,8 +7,8 @@ export const PHYSICS = {
     GRAVITY: isMobile ? 0.3 : 0.4,          // Gentler gravity on mobile
     DAMPING: isMobile ? 0.993 : 0.995,      // Slightly more damping on mobile
     MAX_VELOCITY: isMobile ? 15 : 18.75,    // 20% slower on mobile
-    FLIPPER_POWER: 25,
-    FLIPPER_BASE_POWER: 10,
+    FLIPPER_POWER: 35,
+    FLIPPER_BASE_POWER: 15,
     // Speed zone settings for progressive slowing near flippers
     REACTION_ZONE_Y: 0.8,                   // Start slowing at 80% down the table
     REACTION_ZONE_FACTOR: isMobile ? 0.75 : 0.85  // Slow to 75% speed on mobile, 85% on desktop
