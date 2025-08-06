@@ -19,17 +19,6 @@ export class Ball {
         this.vx *= PHYSICS.DAMPING;
         this.vy *= PHYSICS.DAMPING;
         
-        // Progressive speed reduction in reaction zone (near flippers)
-        if (this.y > CANVAS.HEIGHT * PHYSICS.REACTION_ZONE_Y) {
-            // Apply additional slowing in the reaction zone
-            const zoneDepth = (this.y - CANVAS.HEIGHT * PHYSICS.REACTION_ZONE_Y) / 
-                            (CANVAS.HEIGHT * (1 - PHYSICS.REACTION_ZONE_Y));
-            const slowFactor = 1 - (1 - PHYSICS.REACTION_ZONE_FACTOR) * Math.min(zoneDepth, 1);
-            
-            this.vx *= slowFactor;
-            this.vy *= slowFactor;
-        }
-        
         // Limit velocity
         const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
         if (speed > PHYSICS.MAX_VELOCITY) {
