@@ -123,36 +123,37 @@ export class Game {
                 case 'bumper':
                     this.particleSystem.createSparkEffect(x, y, element.color || '#ff6600');
                     this.audioManager.play('bumper-hit', {
-                        volume: this.audioManager.calculateSpatialVolume(x, y),
-                        pitch: this.audioManager.calculatePitchVariation(element)
+                        volume: 0.6,
+                        pitch: 0.9 + Math.random() * 0.2
                     });
                     break;
                 case 'angledBumper':
                     const angle = Math.atan2(element.endY - element.startY, element.endX - element.startX) + Math.PI / 2;
                     this.particleSystem.createSparkEffect(x, y, element.color || '#ff00ff', angle);
                     this.audioManager.play('angledBumper-hit', {
-                        volume: this.audioManager.calculateSpatialVolume(x, y),
-                        pitch: this.audioManager.calculatePitchVariation(element)
+                        volume: 0.7,
+                        pitch: 1.0 + Math.random() * 0.3
                     });
                     break;
                 case 'target':
                     this.particleSystem.createCollisionEffect(x, y, '#00ffff', 0.5);
                     this.audioManager.play('target-hit', {
-                        volume: this.audioManager.calculateSpatialVolume(x, y)
+                        volume: 0.8,
+                        pitch: 1.0
                     });
                     break;
                 case 'spinner':
                     this.particleSystem.createCollisionEffect(x, y, '#ffff00', 0.7);
                     this.audioManager.play('spinner-hit', {
-                        volume: this.audioManager.calculateSpatialVolume(x, y),
-                        pitch: 1.0 + Math.random() * 0.5
+                        volume: 0.5,
+                        pitch: 1.2 + Math.random() * 0.4
                     });
                     break;
                 case 'flipper':
                     this.particleSystem.createCollisionEffect(x, y, '#00ff00', 0.6);
                     this.audioManager.play('ball-bounce', {
-                        volume: this.audioManager.calculateSpatialVolume(x, y) * 1.2,
-                        pitch: 1.2 + Math.random() * 0.3
+                        volume: 0.4,
+                        pitch: 1.1 + Math.random() * 0.2
                     });
                     break;
                 case 'wall':

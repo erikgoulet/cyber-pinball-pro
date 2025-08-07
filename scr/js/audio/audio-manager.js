@@ -53,25 +53,25 @@ export class AudioManager {
             'bumper-hit': { 
                 url: 'scr/audio/sfx/collisions/bumper.ogg',
                 fallback: () => this.generateBumperSound(),
-                volume: 0.8,
+                volume: 0.5,
                 poolSize: 4
             },
             'angledBumper-hit': { 
                 url: 'scr/audio/sfx/collisions/angled-bumper.ogg',
                 fallback: () => this.generateAngledBumperSound(),
-                volume: 0.8,
+                volume: 0.5,
                 poolSize: 3
             },
             'target-hit': { 
                 url: 'scr/audio/sfx/collisions/target.ogg',
                 fallback: () => this.generateTargetSound(),
-                volume: 0.9,
+                volume: 0.6,
                 poolSize: 3
             },
             'spinner-hit': { 
                 url: 'scr/audio/sfx/collisions/spinner.ogg',
                 fallback: () => this.generateSpinnerSound(),
-                volume: 0.7,
+                volume: 0.4,
                 poolSize: 2
             },
             'ramp-hit': { 
@@ -321,7 +321,8 @@ export class AudioManager {
     }
 
     generateBounceSound() {
-        return this.createTone(300 + Math.random() * 200, 0.1, 0.05, 'square');
+        // Quick metallic bounce
+        return this.createTone(400 + Math.random() * 200, 0.08, 0.01, 'triangle');
     }
 
     generateLostSound() {
@@ -334,19 +335,23 @@ export class AudioManager {
     }
 
     generateBumperSound() {
-        return this.createTone(600 + Math.random() * 400, 0.2, 0.1, 'sawtooth');
+        // Classic pinball bumper "boing" sound
+        return this.createTone(150 + Math.random() * 100, 0.15, 0.01, 'sine');
     }
 
     generateAngledBumperSound() {
-        return this.createTone(700 + Math.random() * 300, 0.25, 0.12, 'square');
+        // Slightly higher pitched bumper sound
+        return this.createTone(200 + Math.random() * 150, 0.15, 0.01, 'sine');
     }
 
     generateTargetSound() {
-        return this.createTone(1000, 0.3, 0.15, 'triangle');
+        // Satisfying "ding" sound
+        return this.createTone(800, 0.2, 0.01, 'sine', true);
     }
 
     generateSpinnerSound() {
-        return this.createTone(1200, 0.4, 0.2, 'sawtooth');
+        // Quick spinning tick sound
+        return this.createTone(2000, 0.05, 0.001, 'square');
     }
 
     generateRampSound() {
@@ -354,7 +359,8 @@ export class AudioManager {
     }
 
     generateWallSound() {
-        return this.createTone(250, 0.1, 0.03, 'square');
+        // Soft thud
+        return this.createTone(100, 0.05, 0.01, 'sine');
     }
 
     generateExtraBallSound() {
