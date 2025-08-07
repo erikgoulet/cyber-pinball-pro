@@ -119,26 +119,38 @@ export class AudioManager {
     }
 
     async initialize() {
-        if (this.initialized) return;
+        if (this.initialized) return true;
         
         try {
-            // Create audio context
-            this.context = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Handle suspended state (mobile autoplay restrictions)
-            if (this.context.state === 'suspended') {
-                await this.context.resume();
+            // Create audio context if not exists
+            if (!this.context) {
+                this.context = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('Audio context created, state:', this.context.state);
             }
             
-            this.initialized = true;
-            console.log('AudioManager initialized successfully');
+            // Resume if suspended (critical for mobile)
+            if (this.context.state === 'suspended') {
+                console.log('Audio context suspended, attempting to resume...');
+                await this.context.resume();
+                console.log('Audio context resumed, new state:', this.context.state);
+            }
             
-            // Preload critical sounds
-            await this.preloadCriticalSounds();
+            this.initialized = this.context.state === 'running';
+            
+            if (this.initialized) {
+                console.log('AudioManager initialized successfully');
+                // Preload critical sounds after successful initialization
+                setTimeout(() => this.preloadCriticalSounds(), 100);
+            } else {
+                console.warn('Audio context not running, state:', this.context.state);
+            }
+            
+            return this.initialized;
             
         } catch (error) {
-            console.warn('AudioManager initialization failed:', error);
+            console.error('AudioManager initialization failed:', error);
             this.settings.enabled = false;
+            return false;
         }
     }
 
