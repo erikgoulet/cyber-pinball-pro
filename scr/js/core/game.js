@@ -107,7 +107,11 @@ export class Game {
         });
         
         // Start button
-        document.getElementById('startBtn').onclick = () => this.start();
+        document.getElementById('startBtn').onclick = () => {
+            this.start().catch(error => {
+                console.error('Error starting game:', error);
+            });
+        };
         
         // Audio controls
         this.setupAudioControls();
@@ -178,24 +182,15 @@ export class Game {
         // Load audio settings from localStorage
         this.audioManager.loadSettings();
         
-        // Setup audio unlock for mobile devices
-        const unlockAudio = async () => {
-            await this.audioManager.initialize();
-            document.removeEventListener('touchstart', unlockAudio);
-            document.removeEventListener('click', unlockAudio);
-            document.removeEventListener('keydown', unlockAudio);
-        };
-        
-        document.addEventListener('touchstart', unlockAudio);
-        document.addEventListener('click', unlockAudio);
-        document.addEventListener('keydown', unlockAudio);
+        // Audio will be initialized when game starts (in start() method)
+        // This ensures proper user gesture context for mobile browsers
     }
     
     setupAudioControls() {
         // Audio controls removed
     }
     
-    start() {
+    async start() {
         document.getElementById('menu').classList.add('hidden');
         this.gameRunning = true;
         this.ballsLeft = GAME.INITIAL_BALLS;
@@ -205,9 +200,18 @@ export class Game {
         this.nextExtraBallIndex = 0;
         this.extraBallsEarned = 0;
         
-        // Start ambient music if available and enabled
-        if (this.audioManager.settings.enabled) {
-            this.audioManager.play('ambient-music', { volume: 0.3 });
+        // Initialize audio within user gesture context (critical for mobile)
+        try {
+            await this.audioManager.initialize();
+            console.log('Audio initialized successfully in game start');
+            
+            // Start ambient music if available and enabled
+            if (this.audioManager.settings.enabled) {
+                this.audioManager.play('ambient-music', { volume: 0.3 });
+            }
+        } catch (error) {
+            console.warn('Audio initialization failed:', error);
+            // Game continues without audio
         }
         
         this.updateUI();

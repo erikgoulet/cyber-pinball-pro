@@ -208,6 +208,15 @@ export class AudioManager {
             return;
         }
         
+        // Check if audio context is still running (mobile browsers can suspend it)
+        if (this.context && this.context.state === 'suspended') {
+            console.log('Audio context suspended, attempting to resume...');
+            this.context.resume().catch(error => {
+                console.warn('Failed to resume audio context:', error);
+            });
+            return;
+        }
+        
         // Auto-load sound if not loaded yet
         if (!this.sounds.has(soundId)) {
             this.loadSound(soundId).then(() => {

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Audio Test - Cyber Pinball Pro</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px;
+            background: #000;
+            color: #00ff00;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Mobile Audio Test</h1>
+    <p>This page tests if the mobile audio fix is working</p>
+    
+    <div id="status">Status: Waiting for test...</div>
+    
+    <button onclick="testAudio()">🎮 Test Audio (Like START GAME)</button>
+    <button onclick="testFlipperSound()">🎯 Test Flipper Sound</button>
+    
+    <p><a href="index.html" style="color: #00ff00;">← Back to Game</a></p>
+    
+    <script type="module">
+        import { AudioManager } from './scr/js/audio/audio-manager.js';
+        
+        let audioManager;
+        let statusDiv = document.getElementById('status');
+        
+        function updateStatus(message, isError = false) {
+            statusDiv.innerHTML = message;
+            statusDiv.style.color = isError ? '#ff0000' : '#00ff00';
+            console.log(message);
+        }
+        
+        window.testAudio = async function() {
+            try {
+                updateStatus('🔄 Initializing AudioManager...');
+                audioManager = new AudioManager();
+                
+                updateStatus('🔄 Loading settings...');
+                audioManager.loadSettings();
+                
+                updateStatus('🔄 Initializing audio context (mobile-friendly)...');
+                await audioManager.initialize();
+                
+                if (audioManager.initialized) {
+                    updateStatus('✅ Audio initialized successfully! Mobile audio should work.');
+                    
+                    // Test a basic sound
+                    updateStatus('🔄 Testing flipper sound...');
+                    audioManager.play('flipper-up', { volume: 0.8 });
+                    
+                    setTimeout(() => {
+                        updateStatus('✅ Audio test complete! If you heard a sound, mobile audio is working.');
+                    }, 1000);
+                } else {
+                    updateStatus('❌ Audio initialization failed', true);
+                }
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}`, true);
+            }
+        }
+        
+        window.testFlipperSound = function() {
+            if (!audioManager || !audioManager.initialized) {
+                updateStatus('❌ Please run main audio test first!', true);
+                return;
+            }
+            
+            updateStatus('🔊 Playing flipper sound...');
+            audioManager.play('flipper-up', { volume: 0.8 });
+        }
+        
+        updateStatus('📱 Ready for mobile audio test. Click "Test Audio" button.');
+    </script>
+</body>
+</html>
