@@ -444,9 +444,7 @@ export class Game {
     }
     
     updateUI() {
-        document.getElementById('score').textContent = this.score;
-        document.getElementById('balls').textContent = this.ballsLeft;
-        document.getElementById('highScore').textContent = this.highScore;
+        // HTML UI removed - all display handled by canvas HUD (uiDisplay)
     }
     
     gameOver() {

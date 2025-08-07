@@ -36,47 +36,7 @@ body {
   height: 100%;
 }
 
-#ui {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 10px;
-  pointer-events: none;
-  z-index: 10;
-  display: block;
-}
-
-#title {
-  font-size: 20px;
-  color: #0ff;
-  text-align: center;
-  text-shadow: 0 0 10px #0ff;
-  margin-bottom: 10px;
-}
-
-.score-info {
-  display: flex;
-  justify-content: space-between;
-  color: #fff;
-  font-size: 14px;
-}
-
-.score-info span {
-  text-shadow: 0 0 5px currentColor;
-}
-
-#score {
-  color: #0f0;
-}
-
-#balls {
-  color: #ff0;
-}
-
-#highScore {
-  color: #f0f;
-}
+/* HTML UI removed - using canvas HUD instead */
 
 .control-btn {
   position: absolute;
