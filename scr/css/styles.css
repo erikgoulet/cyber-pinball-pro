@@ -157,33 +157,6 @@ body {
   gap: 10px;
 }
 
-#audioToggle {
-  background: rgba(0, 255, 255, 0.2);
-  border: 2px solid #0ff;
-  color: #0ff;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 18px;
-  transition: all 0.3s;
-  border-radius: 4px;
-}
-
-#audioToggle:hover {
-  background: rgba(0, 255, 255, 0.4);
-  transform: scale(1.05);
-}
-
-#audioToggle.muted {
-  opacity: 0.6;
-  background: rgba(255, 0, 0, 0.2);
-  border-color: #ff3333;
-  color: #ff3333;
-}
-
-#audioToggle.muted:hover {
-  background: rgba(255, 0, 0, 0.3);
-  transform: scale(1.05);
-}
 
 /* Mobile responsive */
 @media (max-width: 500px) {
@@ -208,10 +181,4 @@ body {
     z-index: 100;
   }
   
-  #audioToggle {
-    padding: 10px 14px;
-    font-size: 20px;
-    background: rgba(0, 255, 255, 0.3);
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-  }
 }

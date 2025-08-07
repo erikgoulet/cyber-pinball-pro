@@ -192,28 +192,7 @@ export class Game {
     }
     
     setupAudioControls() {
-        const audioToggle = document.getElementById('audioToggle');
-        const audioIcon = document.getElementById('audioIcon');
-        
-        // Simple mute/unmute toggle
-        audioToggle.addEventListener('click', () => {
-            const enabled = !this.audioManager.settings.enabled;
-            this.audioManager.setEnabled(enabled);
-            
-            if (enabled) {
-                audioToggle.classList.remove('muted');
-                audioIcon.textContent = '🔊';
-            } else {
-                audioToggle.classList.add('muted');
-                audioIcon.textContent = '🔇';
-            }
-        });
-        
-        // Initialize toggle state
-        if (!this.audioManager.settings.enabled) {
-            audioToggle.classList.add('muted');
-            audioIcon.textContent = '🔇';
-        }
+        // Audio controls removed
     }
     
     start() {
