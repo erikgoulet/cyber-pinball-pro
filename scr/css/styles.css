@@ -43,7 +43,7 @@ body {
   padding: 10px;
   pointer-events: none;
   z-index: 10;
-  display: none;
+  display: block;
 }
 
 #title {
@@ -185,6 +185,94 @@ body {
   display: none !important;
 }
 
+/* Audio controls */
+#audioControls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#audioToggle {
+  background: rgba(0, 255, 255, 0.2);
+  border: 2px solid #0ff;
+  color: #0ff;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s;
+  border-radius: 4px;
+}
+
+#audioToggle:hover {
+  background: rgba(0, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+#audioToggle.disabled {
+  opacity: 0.5;
+  color: #666;
+  border-color: #666;
+}
+
+#audioToggle.disabled #audioIcon::before {
+  content: '🔇';
+}
+
+#volumeControls {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 15px;
+  border: 2px solid #0ff;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+#volumeControls.show {
+  display: flex;
+}
+
+#volumeControls label {
+  color: #0ff;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+#volumeControls input[type="range"] {
+  width: 100px;
+  height: 4px;
+  background: rgba(0, 255, 255, 0.3);
+  outline: none;
+  border-radius: 2px;
+  appearance: none;
+}
+
+#volumeControls input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #0ff;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+#volumeControls input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #0ff;
+  cursor: pointer;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
 /* Mobile responsive */
 @media (max-width: 500px) {
   #gameContainer {
@@ -198,5 +286,24 @@ body {
   .control-btn {
     font-size: 20px;
     padding: 10px 15px;
+  }
+  
+  #audioControls {
+    top: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+  
+  #audioToggle {
+    padding: 6px 10px;
+    font-size: 16px;
+  }
+  
+  #volumeControls {
+    padding: 10px;
+  }
+  
+  #volumeControls input[type="range"] {
+    width: 80px;
   }
 }

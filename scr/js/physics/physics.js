@@ -558,6 +558,11 @@ export class Physics {
             
             this.addScore(SCORING.RAMP_HIT);
             
+            // Trigger collision callback
+            if (this.collisionCallback) {
+                this.collisionCallback('ramp', closestX, closestY, ramp);
+            }
+            
             return true;
         }
         

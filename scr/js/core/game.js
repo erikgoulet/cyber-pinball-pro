@@ -7,6 +7,7 @@ import { InputManager } from './input-manager.js';
 import { ELEMENTS } from '../config/elements.js';
 import { GAME, BALL, SCORING } from '../config/constants.js';
 import { ParticleSystem } from '../effects/particle-system.js';
+import { AudioManager } from '../audio/audio-manager.js';
 
 export class Game {
     constructor(canvas) {
@@ -16,6 +17,7 @@ export class Game {
         this.physics = new Physics();
         this.input = new InputManager();
         this.particleSystem = new ParticleSystem();
+        this.audioManager = new AudioManager();
         
         this.gameRunning = false;
         this.score = 0;
@@ -45,24 +47,33 @@ export class Game {
         
         this.setupInputHandlers();
         this.setupPhysicsCallbacks();
+        this.setupAudio();
         this.updateUI();
     }
     
     setupInputHandlers() {
         this.input.on('leftFlipperDown', () => {
-            if (this.gameRunning) this.flippers.left.activate();
+            if (this.gameRunning) {
+                this.flippers.left.activate();
+                this.audioManager.play('flipper-up', { volume: 0.8 });
+            }
         });
         
         this.input.on('leftFlipperUp', () => {
             this.flippers.left.deactivate();
+            this.audioManager.play('flipper-down', { volume: 0.6 });
         });
         
         this.input.on('rightFlipperDown', () => {
-            if (this.gameRunning) this.flippers.right.activate();
+            if (this.gameRunning) {
+                this.flippers.right.activate();
+                this.audioManager.play('flipper-up', { volume: 0.8 });
+            }
         });
         
         this.input.on('rightFlipperUp', () => {
             this.flippers.right.deactivate();
+            this.audioManager.play('flipper-down', { volume: 0.6 });
         });
         
         this.input.on('chargeStart', () => {
@@ -77,6 +88,13 @@ export class Game {
                 const power = BALL.LAUNCH_MIN_POWER + (clampedTime / BALL.MAX_CHARGE_TIME) * (BALL.LAUNCH_MAX_POWER - BALL.LAUNCH_MIN_POWER);
                 this.ball.launch(power);
                 
+                // Play launch sound with power-based pitch
+                const launchPitch = 0.8 + (power / BALL.LAUNCH_MAX_POWER) * 0.4;
+                this.audioManager.play('ball-launch', {
+                    volume: 0.9,
+                    pitch: launchPitch
+                });
+                
                 // Decrement balls when launching
                 this.ballsLeft--;
                 
@@ -90,6 +108,9 @@ export class Game {
         
         // Start button
         document.getElementById('startBtn').onclick = () => this.start();
+        
+        // Audio controls
+        this.setupAudioControls();
     }
     
     setupPhysicsCallbacks() {
@@ -117,9 +138,104 @@ export class Game {
                     break;
                 case 'wall':
                     this.particleSystem.createCollisionEffect(x, y, '#0088ff', 0.3);
+                    this.audioManager.play('wall-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y) * 0.7,
+                        pitch: this.audioManager.calculatePitchVariation(element)
+                    });
+                    break;
+                case 'ramp':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ff00', 0.8);
+                    this.audioManager.play('ramp-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y) * 0.9,
+                        pitch: 0.9 + Math.random() * 0.2
+                    });
                     break;
             }
         });
+    }
+    
+    setupAudio() {
+        // Load audio settings from localStorage
+        this.audioManager.loadSettings();
+        
+        // Setup audio unlock for mobile devices
+        const unlockAudio = async () => {
+            await this.audioManager.initialize();
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('keydown', unlockAudio);
+        };
+        
+        document.addEventListener('touchstart', unlockAudio);
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('keydown', unlockAudio);
+    }
+    
+    setupAudioControls() {
+        const audioToggle = document.getElementById('audioToggle');
+        const audioIcon = document.getElementById('audioIcon');
+        const volumeControls = document.getElementById('volumeControls');
+        const masterVolumeSlider = document.getElementById('masterVolume');
+        const sfxVolumeSlider = document.getElementById('sfxVolume');
+        
+        // Toggle audio on/off
+        audioToggle.addEventListener('click', () => {
+            const enabled = !this.audioManager.settings.enabled;
+            this.audioManager.setEnabled(enabled);
+            
+            if (enabled) {
+                audioToggle.classList.remove('disabled');
+                audioIcon.textContent = '🔊';
+            } else {
+                audioToggle.classList.add('disabled');
+                audioIcon.textContent = '🔇';
+            }
+        });
+        
+        // Show/hide volume controls on hover
+        let hoverTimeout;
+        
+        audioToggle.addEventListener('mouseenter', () => {
+            clearTimeout(hoverTimeout);
+            volumeControls.classList.add('show');
+        });
+        
+        audioToggle.addEventListener('mouseleave', () => {
+            hoverTimeout = setTimeout(() => {
+                if (!volumeControls.matches(':hover')) {
+                    volumeControls.classList.remove('show');
+                }
+            }, 500);
+        });
+        
+        volumeControls.addEventListener('mouseenter', () => {
+            clearTimeout(hoverTimeout);
+        });
+        
+        volumeControls.addEventListener('mouseleave', () => {
+            volumeControls.classList.remove('show');
+        });
+        
+        // Volume sliders
+        masterVolumeSlider.addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            this.audioManager.setVolume('master', volume);
+        });
+        
+        sfxVolumeSlider.addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            this.audioManager.setVolume('sfx', volume);
+        });
+        
+        // Initialize slider positions from settings
+        masterVolumeSlider.value = this.audioManager.settings.masterVolume * 100;
+        sfxVolumeSlider.value = this.audioManager.settings.sfxVolume * 100;
+        
+        // Initialize toggle state
+        if (!this.audioManager.settings.enabled) {
+            audioToggle.classList.add('disabled');
+            audioIcon.textContent = '🔇';
+        }
     }
     
     start() {
@@ -131,6 +247,11 @@ export class Game {
         // Reset extra ball tracking
         this.nextExtraBallIndex = 0;
         this.extraBallsEarned = 0;
+        
+        // Start ambient music if available and enabled
+        if (this.audioManager.settings.enabled) {
+            this.audioManager.play('ambient-music', { volume: 0.3 });
+        }
         
         this.updateUI();
         this.resetBall();
@@ -211,6 +332,9 @@ export class Game {
             
             // Check if ball is lost
             if (this.ball.y > GAME.BALL_LOST_Y && !this.waitingForNextBall) {
+                // Play ball lost sound
+                this.audioManager.play('ball-lost', { volume: 0.8 });
+                
                 if (this.ballsLeft > 0) {
                     this.waitingForNextBall = true;
                     setTimeout(() => {
@@ -296,7 +420,9 @@ export class Game {
         // Visual feedback for extra ball
         this.showExtraBallMessage();
         
-        // Play a sound or animation (future enhancement)
+        // Play extra ball sound
+        this.audioManager.play('extra-ball', { volume: 1.0 });
+        
         console.log(`EXTRA BALL! Total earned: ${this.extraBallsEarned}`);
     }
     
@@ -347,6 +473,9 @@ export class Game {
     
     gameOver() {
         this.gameRunning = false;
+        
+        // Play game over sound
+        this.audioManager.play('game-over', { volume: 0.9 });
         
         // Save high score
         if (this.score > this.highScore) {
