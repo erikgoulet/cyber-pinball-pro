@@ -139,8 +139,8 @@ export class AudioManager {
             
             if (this.initialized) {
                 console.log('AudioManager initialized successfully');
-                // Don't preload sounds - let them load on demand with fallback
-                // This prevents 404 errors when audio files don't exist
+                // Pre-generate critical sounds to avoid timing issues
+                await this.generateCriticalSounds();
             } else {
                 console.warn('Audio context not running, state:', this.context.state);
             }
@@ -154,9 +154,10 @@ export class AudioManager {
         }
     }
 
-    async preloadCriticalSounds() {
+    async generateCriticalSounds() {
+        console.log('Pre-generating critical sounds...');
         const criticalSounds = [
-            'ball-launch', 'ball-bounce', 'flipper-up', 'flipper-down',
+            'flipper-up', 'flipper-down', 'ball-launch', 'ball-bounce',
             'bumper-hit', 'angledBumper-hit', 'target-hit', 'spinner-hit',
             'ramp-hit', 'wall-hit', 'extra-ball', 'ball-lost'
         ];
@@ -164,6 +165,7 @@ export class AudioManager {
         for (const soundId of criticalSounds) {
             await this.loadSound(soundId);
         }
+        console.log('Critical sounds generated');
     }
 
     async loadSound(soundId) {
@@ -175,10 +177,8 @@ export class AudioManager {
         // Skip file loading entirely to avoid 404 errors
         // Always use generated sounds since audio files don't exist
         try {
-            console.log(`Generating sound for ${soundId}`);
             const generatedBuffer = soundDef.fallback();
             this.sounds.set(soundId, generatedBuffer);
-            console.log(`Generated sound for ${soundId} successfully`);
             
             // Create sound pool
             this.createSoundPool(soundId, soundDef.poolSize || 2);
@@ -199,8 +199,6 @@ export class AudioManager {
     }
 
     play(soundId, options = {}) {
-        console.log(`Attempting to play sound: ${soundId}, initialized: ${this.initialized}, enabled: ${this.settings.enabled}`);
-        
         if (!this.initialized || !this.settings.enabled) {
             console.warn(`Sound blocked - initialized: ${this.initialized}, enabled: ${this.settings.enabled}`);
             return;
