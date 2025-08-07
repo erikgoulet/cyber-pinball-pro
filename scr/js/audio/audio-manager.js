@@ -157,7 +157,8 @@ export class AudioManager {
     async preloadCriticalSounds() {
         const criticalSounds = [
             'ball-launch', 'ball-bounce', 'flipper-up', 'flipper-down',
-            'bumper-hit', 'target-hit', 'extra-ball'
+            'bumper-hit', 'angledBumper-hit', 'target-hit', 'spinner-hit',
+            'ramp-hit', 'wall-hit', 'extra-ball', 'ball-lost'
         ];
         
         for (const soundId of criticalSounds) {
@@ -186,6 +187,7 @@ export class AudioManager {
             console.log(`Loading fallback sound for ${soundId}`);
             const generatedBuffer = soundDef.fallback();
             this.sounds.set(soundId, generatedBuffer);
+            console.log(`Generated fallback sound for ${soundId}`);
         }
         
         // Create sound pool
@@ -202,7 +204,18 @@ export class AudioManager {
     }
 
     play(soundId, options = {}) {
-        if (!this.initialized || !this.settings.enabled || !this.sounds.has(soundId)) {
+        if (!this.initialized || !this.settings.enabled) {
+            return;
+        }
+        
+        // Auto-load sound if not loaded yet
+        if (!this.sounds.has(soundId)) {
+            this.loadSound(soundId).then(() => {
+                // Try playing again after loading
+                if (this.sounds.has(soundId)) {
+                    this.play(soundId, options);
+                }
+            });
             return;
         }
         
@@ -258,7 +271,7 @@ export class AudioManager {
             source.start(0);
             
         } catch (error) {
-            console.warn(`Error playing sound ${soundId}:`, error);
+            console.error(`Error playing sound ${soundId}:`, error);
             instance.inUse = false;
         }
     }

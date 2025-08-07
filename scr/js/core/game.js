@@ -122,19 +122,38 @@ export class Game {
             switch(type) {
                 case 'bumper':
                     this.particleSystem.createSparkEffect(x, y, element.color || '#ff6600');
+                    this.audioManager.play('bumper-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y),
+                        pitch: this.audioManager.calculatePitchVariation(element)
+                    });
                     break;
                 case 'angledBumper':
                     const angle = Math.atan2(element.endY - element.startY, element.endX - element.startX) + Math.PI / 2;
                     this.particleSystem.createSparkEffect(x, y, element.color || '#ff00ff', angle);
+                    this.audioManager.play('angledBumper-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y),
+                        pitch: this.audioManager.calculatePitchVariation(element)
+                    });
                     break;
                 case 'target':
                     this.particleSystem.createCollisionEffect(x, y, '#00ffff', 0.5);
+                    this.audioManager.play('target-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y)
+                    });
                     break;
                 case 'spinner':
                     this.particleSystem.createCollisionEffect(x, y, '#ffff00', 0.7);
+                    this.audioManager.play('spinner-hit', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y),
+                        pitch: 1.0 + Math.random() * 0.5
+                    });
                     break;
                 case 'flipper':
                     this.particleSystem.createCollisionEffect(x, y, '#00ff00', 0.6);
+                    this.audioManager.play('ball-bounce', {
+                        volume: this.audioManager.calculateSpatialVolume(x, y) * 1.2,
+                        pitch: 1.2 + Math.random() * 0.3
+                    });
                     break;
                 case 'wall':
                     this.particleSystem.createCollisionEffect(x, y, '#0088ff', 0.3);
