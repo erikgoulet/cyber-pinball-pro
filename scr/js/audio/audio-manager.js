@@ -199,7 +199,10 @@ export class AudioManager {
     }
 
     play(soundId, options = {}) {
+        console.log(`Attempting to play sound: ${soundId}, initialized: ${this.initialized}, enabled: ${this.settings.enabled}`);
+        
         if (!this.initialized || !this.settings.enabled) {
+            console.warn(`Sound blocked - initialized: ${this.initialized}, enabled: ${this.settings.enabled}`);
             return;
         }
         
@@ -313,10 +316,16 @@ export class AudioManager {
             try {
                 const settings = JSON.parse(saved);
                 Object.assign(this.settings, settings);
+                console.log('Loaded audio settings from localStorage:', this.settings);
             } catch (e) {
                 console.warn('Failed to load audio settings');
             }
         }
+        
+        // Force enable audio since mute button was removed
+        // This fixes the issue where audio might have been muted before
+        this.settings.enabled = true;
+        console.log('Audio settings after load:', this.settings);
     }
 
     // Procedural sound generation fallbacks
