@@ -213,65 +213,16 @@ body {
   transform: scale(1.05);
 }
 
-#audioToggle.disabled {
-  opacity: 0.5;
-  color: #666;
-  border-color: #666;
+#audioToggle.muted {
+  opacity: 0.6;
+  background: rgba(255, 0, 0, 0.2);
+  border-color: #ff3333;
+  color: #ff3333;
 }
 
-#audioToggle.disabled #audioIcon::before {
-  content: '🔇';
-}
-
-#volumeControls {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.9);
-  padding: 15px;
-  border: 2px solid #0ff;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-}
-
-#volumeControls.show {
-  display: flex;
-}
-
-#volumeControls label {
-  color: #0ff;
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-#volumeControls input[type="range"] {
-  width: 100px;
-  height: 4px;
-  background: rgba(0, 255, 255, 0.3);
-  outline: none;
-  border-radius: 2px;
-  appearance: none;
-}
-
-#volumeControls input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #0ff;
-  cursor: pointer;
-  border-radius: 50%;
-  box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
-}
-
-#volumeControls input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #0ff;
-  cursor: pointer;
-  border-radius: 50%;
-  border: none;
-  box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+#audioToggle.muted:hover {
+  background: rgba(255, 0, 0, 0.3);
+  transform: scale(1.05);
 }
 
 /* Mobile responsive */
@@ -302,13 +253,5 @@ body {
     font-size: 20px;
     background: rgba(0, 255, 255, 0.3);
     box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
-  }
-  
-  #volumeControls {
-    padding: 10px;
-  }
-  
-  #volumeControls input[type="range"] {
-    width: 80px;
   }
 }

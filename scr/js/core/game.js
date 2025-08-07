@@ -174,66 +174,24 @@ export class Game {
     setupAudioControls() {
         const audioToggle = document.getElementById('audioToggle');
         const audioIcon = document.getElementById('audioIcon');
-        const volumeControls = document.getElementById('volumeControls');
-        const masterVolumeSlider = document.getElementById('masterVolume');
-        const sfxVolumeSlider = document.getElementById('sfxVolume');
         
-        // Toggle audio on/off
+        // Simple mute/unmute toggle
         audioToggle.addEventListener('click', () => {
             const enabled = !this.audioManager.settings.enabled;
             this.audioManager.setEnabled(enabled);
             
             if (enabled) {
-                audioToggle.classList.remove('disabled');
+                audioToggle.classList.remove('muted');
                 audioIcon.textContent = '🔊';
             } else {
-                audioToggle.classList.add('disabled');
+                audioToggle.classList.add('muted');
                 audioIcon.textContent = '🔇';
             }
         });
         
-        // Show/hide volume controls on hover
-        let hoverTimeout;
-        
-        audioToggle.addEventListener('mouseenter', () => {
-            clearTimeout(hoverTimeout);
-            volumeControls.classList.add('show');
-        });
-        
-        audioToggle.addEventListener('mouseleave', () => {
-            hoverTimeout = setTimeout(() => {
-                if (!volumeControls.matches(':hover')) {
-                    volumeControls.classList.remove('show');
-                }
-            }, 500);
-        });
-        
-        volumeControls.addEventListener('mouseenter', () => {
-            clearTimeout(hoverTimeout);
-        });
-        
-        volumeControls.addEventListener('mouseleave', () => {
-            volumeControls.classList.remove('show');
-        });
-        
-        // Volume sliders
-        masterVolumeSlider.addEventListener('input', (e) => {
-            const volume = e.target.value / 100;
-            this.audioManager.setVolume('master', volume);
-        });
-        
-        sfxVolumeSlider.addEventListener('input', (e) => {
-            const volume = e.target.value / 100;
-            this.audioManager.setVolume('sfx', volume);
-        });
-        
-        // Initialize slider positions from settings
-        masterVolumeSlider.value = this.audioManager.settings.masterVolume * 100;
-        sfxVolumeSlider.value = this.audioManager.settings.sfxVolume * 100;
-        
         // Initialize toggle state
         if (!this.audioManager.settings.enabled) {
-            audioToggle.classList.add('disabled');
+            audioToggle.classList.add('muted');
             audioIcon.textContent = '🔇';
         }
     }
