@@ -139,8 +139,8 @@ export class AudioManager {
             
             if (this.initialized) {
                 console.log('AudioManager initialized successfully');
-                // Preload critical sounds after successful initialization
-                setTimeout(() => this.preloadCriticalSounds(), 100);
+                // Don't preload sounds - let them load on demand with fallback
+                // This prevents 404 errors when audio files don't exist
             } else {
                 console.warn('Audio context not running, state:', this.context.state);
             }
@@ -172,27 +172,22 @@ export class AudioManager {
         const soundDef = this.soundLibrary[soundId];
         if (!soundDef) return;
         
+        // Skip file loading entirely to avoid 404 errors
+        // Always use generated sounds since audio files don't exist
         try {
-            // Try to load from file first
-            const response = await fetch(soundDef.url);
-            if (response.ok) {
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await this.context.decodeAudioData(arrayBuffer);
-                this.sounds.set(soundId, audioBuffer);
-            } else {
-                throw new Error('File not found');
-            }
-        } catch (error) {
-            // Fallback to generated sound
-            console.log(`Loading fallback sound for ${soundId}`);
+            console.log(`Generating sound for ${soundId}`);
             const generatedBuffer = soundDef.fallback();
             this.sounds.set(soundId, generatedBuffer);
-            console.log(`Generated fallback sound for ${soundId}`);
+            console.log(`Generated sound for ${soundId} successfully`);
+            
+            // Create sound pool
+            this.createSoundPool(soundId, soundDef.poolSize || 2);
+            this.loadedSounds.add(soundId);
+        } catch (error) {
+            console.error(`Failed to generate sound for ${soundId}:`, error);
+            // Mark as loaded even on error to prevent repeated attempts
+            this.loadedSounds.add(soundId);
         }
-        
-        // Create sound pool
-        this.createSoundPool(soundId, soundDef.poolSize || 2);
-        this.loadedSounds.add(soundId);
     }
 
     createSoundPool(soundId, poolSize) {
