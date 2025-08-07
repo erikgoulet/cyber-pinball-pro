@@ -321,8 +321,8 @@ export class AudioManager {
     }
 
     generateBounceSound() {
-        // Quick metallic bounce
-        return this.createTone(400 + Math.random() * 200, 0.08, 0.01, 'triangle');
+        // Metal-on-metal contact
+        return this.createVintageMetalHit();
     }
 
     generateLostSound() {
@@ -330,37 +330,38 @@ export class AudioManager {
     }
 
     generateFlipperSound(isUp) {
-        const freq = isUp ? 400 : 200;
-        return this.createTone(freq, 0.15, 0.05, 'square');
+        // Solenoid clack
+        return this.createVintageSolenoid(isUp);
     }
 
     generateBumperSound() {
-        // Classic pinball bumper "boing" sound
-        return this.createTone(150 + Math.random() * 100, 0.15, 0.01, 'sine');
+        // Vintage bumper: metallic thump with bell overtones
+        return this.createVintageBumper();
     }
 
     generateAngledBumperSound() {
-        // Slightly higher pitched bumper sound
-        return this.createTone(200 + Math.random() * 150, 0.15, 0.01, 'sine');
+        // Slingshot sound: sharp crack
+        return this.createVintageSlingshot();
     }
 
     generateTargetSound() {
-        // Satisfying "ding" sound
-        return this.createTone(800, 0.2, 0.01, 'sine', true);
+        // Drop target: metallic clack
+        return this.createVintageTarget();
     }
 
     generateSpinnerSound() {
-        // Quick spinning tick sound
-        return this.createTone(2000, 0.05, 0.001, 'square');
+        // Spinner: rapid clicking
+        return this.createVintageSpinner();
     }
 
     generateRampSound() {
-        return this.createTone(500, 0.5, 0.25, 'sine');
+        // Ball rolling on wire
+        return this.createVintageRoll();
     }
 
     generateWallSound() {
-        // Soft thud
-        return this.createTone(100, 0.05, 0.01, 'sine');
+        // Rubber wall: dull thud
+        return this.createVintageRubber();
     }
 
     generateExtraBallSound() {
@@ -426,6 +427,164 @@ export class AudioManager {
             data[i] = value * envelope * 0.3; // Reduce overall volume
         }
 
+        return buffer;
+    }
+    
+    // Vintage pinball machine sound creators
+    createVintageBumper() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.12;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Low frequency thump (60Hz) with bell harmonics
+            let value = Math.sin(2 * Math.PI * 60 * t) * Math.exp(-t * 15);
+            // Add metallic ring (800Hz, 1200Hz)
+            value += Math.sin(2 * Math.PI * 800 * t) * 0.3 * Math.exp(-t * 8);
+            value += Math.sin(2 * Math.PI * 1200 * t) * 0.2 * Math.exp(-t * 10);
+            // Add click transient
+            if (t < 0.002) value += (Math.random() - 0.5) * (1 - t / 0.002);
+            
+            data[i] = value * 0.4;
+        }
+        return buffer;
+    }
+    
+    createVintageSlingshot() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.08;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Sharp crack with wood/metal character
+            let value = (Math.random() - 0.5) * Math.exp(-t * 50);
+            // Add tonal component (250Hz)
+            value += Math.sin(2 * Math.PI * 250 * t) * 0.5 * Math.exp(-t * 30);
+            // High frequency snap (2500Hz)
+            value += Math.sin(2 * Math.PI * 2500 * t) * 0.2 * Math.exp(-t * 100);
+            
+            data[i] = value * 0.5;
+        }
+        return buffer;
+    }
+    
+    createVintageTarget() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.15;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Plastic/metal clack
+            let value = (Math.random() - 0.5) * Math.exp(-t * 80);
+            // Add resonant frequencies (400Hz, 1600Hz)
+            value += Math.sin(2 * Math.PI * 400 * t) * Math.exp(-t * 12);
+            value += Math.sin(2 * Math.PI * 1600 * t) * 0.3 * Math.exp(-t * 20);
+            
+            data[i] = value * 0.4;
+        }
+        return buffer;
+    }
+    
+    createVintageSpinner() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.03;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Quick metallic tick
+            let value = (Math.random() - 0.5) * Math.exp(-t * 200);
+            // High metallic ring (3000Hz)
+            value += Math.sin(2 * Math.PI * 3000 * t) * 0.5 * Math.exp(-t * 150);
+            
+            data[i] = value * 0.3;
+        }
+        return buffer;
+    }
+    
+    createVintageRubber() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.06;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Dull thud with no high frequencies
+            let value = Math.sin(2 * Math.PI * 80 * t) * Math.exp(-t * 40);
+            value += Math.sin(2 * Math.PI * 120 * t) * 0.5 * Math.exp(-t * 35);
+            
+            data[i] = value * 0.3;
+        }
+        return buffer;
+    }
+    
+    createVintageMetalHit() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.1;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Metal ping with multiple harmonics
+            let value = 0;
+            const freqs = [523, 784, 1046, 1568]; // C, G, C, G harmonics
+            freqs.forEach((freq, idx) => {
+                value += Math.sin(2 * Math.PI * freq * t) * (1 / (idx + 1)) * Math.exp(-t * (10 + idx * 5));
+            });
+            // Add impact
+            if (t < 0.001) value += (Math.random() - 0.5) * 2;
+            
+            data[i] = value * 0.25;
+        }
+        return buffer;
+    }
+    
+    createVintageSolenoid(isUp) {
+        const sampleRate = this.context.sampleRate;
+        const duration = isUp ? 0.04 : 0.03;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Mechanical clack
+            let value = (Math.random() - 0.5) * Math.exp(-t * 100);
+            // Add wood/plastic tone
+            const freq = isUp ? 600 : 400;
+            value += Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 50);
+            
+            data[i] = value * (isUp ? 0.5 : 0.3);
+        }
+        return buffer;
+    }
+    
+    createVintageRoll() {
+        const sampleRate = this.context.sampleRate;
+        const duration = 0.2;
+        const buffer = this.context.createBuffer(1, sampleRate * duration, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < data.length; i++) {
+            const t = i / sampleRate;
+            // Rolling sound with varying pitch
+            let value = 0;
+            // Multiple metallic frequencies
+            value += Math.sin(2 * Math.PI * (300 + Math.sin(t * 10) * 50) * t) * 0.3;
+            value += Math.sin(2 * Math.PI * (450 + Math.sin(t * 15) * 75) * t) * 0.2;
+            // Envelope
+            value *= Math.exp(-t * 3);
+            
+            data[i] = value * 0.4;
+        }
         return buffer;
     }
 
