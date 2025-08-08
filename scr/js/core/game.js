@@ -262,10 +262,13 @@ export class Game {
     update() {
         if (!this.gameRunning) return;
         
-        // Update charge meter
+        // Update charge meter and ball position when charging
         if (this.input.isCharging() && !this.ball.launched) {
             const power = this.input.getChargePower();
             document.getElementById('powerBar').style.width = (power * 100) + '%';
+            
+            // Move ball down with plunger when charging
+            this.ball.y = BALL.INITIAL_Y + (power * 30);
         }
         
         // Update flippers

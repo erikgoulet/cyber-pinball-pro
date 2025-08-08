@@ -42,10 +42,10 @@ export class Ball {
     }
     
     launch(power) {
+        // Launch upward from plunger
         this.vy = -power;
-        // Increased horizontal randomness for more varied launches
-        // Range: -4 to +4 (was -1 to +1)
-        this.vx = (Math.random() - 0.5) * 8;
+        // Slight leftward angle for proper table entry
+        this.vx = -2 - (Math.random() * 2); // -2 to -4 for consistent leftward launch
         this.launched = true;
     }
     

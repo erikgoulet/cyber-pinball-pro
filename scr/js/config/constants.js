@@ -24,7 +24,7 @@ export const CANVAS = {
 export const BALL = {
     RADIUS: 8,
     INITIAL_X: 370,
-    INITIAL_Y: 600,
+    INITIAL_Y: 720,  // Start at bottom of launcher chute
     TRAIL_LENGTH: 20,
     LAUNCH_MIN_POWER: isMobile ? 15 : 18.75,   // Slightly lower launch power on mobile
     LAUNCH_MAX_POWER: isMobile ? 35 : 45,       // Moderately lower max power on mobile

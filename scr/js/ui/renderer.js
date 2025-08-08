@@ -99,25 +99,47 @@ export class Renderer {
     }
     
     drawLauncherChute(ball, charging, chargePower) {
+        this.ctx.strokeStyle = COLORS.SECONDARY;
+        this.ctx.lineWidth = 2;
+        
+        // Vertical launch channel - full height
+        this.ctx.beginPath();
+        this.ctx.moveTo(358, 750);  // Extended to bottom
+        this.ctx.lineTo(358, 480);
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(382, 750);  // Extended to bottom
+        this.ctx.lineTo(382, 480);
+        this.ctx.stroke();
+        
+        // Plunger mechanism at bottom
         if (!ball.launched) {
-            this.ctx.strokeStyle = COLORS.SECONDARY;
-            this.ctx.lineWidth = 2;
+            // Plunger spring visualization
+            this.ctx.strokeStyle = '#ffff00';
+            this.ctx.lineWidth = 3;
+            const pullDistance = chargePower * 30; // How far plunger pulls down
+            const springY = 740 + pullDistance;
             
-            // Vertical launch channel
-            this.ctx.beginPath();
-            this.ctx.moveTo(358, 620);
-            this.ctx.lineTo(358, 480);
-            this.ctx.stroke();
+            // Draw spring coils
+            for (let i = 0; i < 5; i++) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(365, 740 - i * 8);
+                this.ctx.lineTo(375, 735 - i * 8);
+                this.ctx.moveTo(375, 735 - i * 8);
+                this.ctx.lineTo(365, 730 - i * 8);
+                this.ctx.stroke();
+            }
             
-            this.ctx.beginPath();
-            this.ctx.moveTo(382, 620);
-            this.ctx.lineTo(382, 480);
-            this.ctx.stroke();
+            // Plunger handle
+            this.ctx.fillStyle = '#888888';
+            this.ctx.fillRect(360, springY - 5, 20, 10);
             
             // Launch indicator
             this.ctx.setLineDash([5, 5]);
+            this.ctx.strokeStyle = COLORS.SECONDARY;
             this.ctx.beginPath();
-            this.ctx.arc(370, 600, 20, 0, Math.PI * 2);
+            this.ctx.arc(370, ball.y, 20, 0, Math.PI * 2);
             this.ctx.stroke();
             
             // Show launch trajectory when charging

@@ -30,11 +30,40 @@ export class Physics {
         const rightX = 385;
         const topY = GAME.TOP_WALL_Y;
         
+        // Launcher chute boundaries
+        const launcherLeft = 358;
+        const launcherRight = 382;
+        const launcherTop = 480;
+        const launcherBottom = 750;
+        
         // Corner centers
         const leftCornerX = leftX + cornerRadius;
         const leftCornerY = topY + cornerRadius;
         const rightCornerX = rightX - cornerRadius;
         const rightCornerY = topY + cornerRadius;
+        
+        // Check if ball is in launcher chute
+        const inLauncherChute = (ball.x >= launcherLeft && ball.x <= launcherRight && 
+                                ball.y >= launcherTop && ball.y <= launcherBottom);
+        
+        if (inLauncherChute) {
+            // Constrain ball to launcher chute walls
+            if (ball.x - ball.radius < launcherLeft) {
+                ball.x = launcherLeft + ball.radius;
+                ball.vx = Math.abs(ball.vx) * 0.9;
+            }
+            if (ball.x + ball.radius > launcherRight) {
+                ball.x = launcherRight - ball.radius;
+                ball.vx = -Math.abs(ball.vx) * 0.9;
+            }
+            // Ball can only exit from top
+            if (ball.y + ball.radius > launcherBottom) {
+                ball.y = launcherBottom - ball.radius;
+                ball.vy = -Math.abs(ball.vy);
+            }
+            // Don't apply other wall physics when in launcher
+            return;
+        }
         
         // CRITICAL: First enforce hard boundaries - ball can NEVER go outside these
         const hardLeftBound = leftX - 10;  // Small buffer outside visible wall
@@ -144,10 +173,13 @@ export class Physics {
             ball.vx = Math.abs(ball.vx) * 0.9;
         }
         
-        // Right wall (below corner)
+        // Right wall (below corner) - skip launcher chute area
         if (ball.y > rightCornerY && ball.x + ball.radius > rightX) {
-            ball.x = rightX - ball.radius;
-            ball.vx = -Math.abs(ball.vx) * 0.9;
+            // Allow ball to pass through launcher chute opening
+            if (ball.y < launcherTop || ball.x < launcherLeft - 10) {
+                ball.x = rightX - ball.radius;
+                ball.vx = -Math.abs(ball.vx) * 0.9;
+            }
         }
         
         // Top wall (only between corners)
@@ -190,9 +222,9 @@ export class Physics {
                 }
             }
             
-            // Right guardrail
+            // Right guardrail - skip launcher area
             const rightGuardX = 385 - (ball.y - 650) * (385 - 300) / (730 - 650);
-            if (ball.x + ball.radius > rightGuardX) {
+            if (ball.x + ball.radius > rightGuardX && ball.x < 358) { // Only apply if ball is not in launcher chute
                 ball.x = rightGuardX - ball.radius;
                 
                 // More accurate angle calculation for the slope
