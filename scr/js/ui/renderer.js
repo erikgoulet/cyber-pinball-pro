@@ -454,4 +454,88 @@ export class Renderer {
         });
         this.ctx.shadowBlur = 0;
     }
+    
+    drawUpperLoop(upperLoop) {
+        // Draw loop track
+        this.ctx.strokeStyle = upperLoop.active ? '#00ffff' : '#006666';
+        this.ctx.lineWidth = upperLoop.active ? 6 : 4;
+        this.ctx.shadowColor = '#00ffff';
+        this.ctx.shadowBlur = upperLoop.active ? 20 : 5;
+        
+        upperLoop.segments.forEach(segment => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(segment.x1, segment.y1);
+            this.ctx.lineTo(segment.x2, segment.y2);
+            this.ctx.stroke();
+        });
+        
+        // Draw entrance/exit indicators
+        this.ctx.fillStyle = '#00ffff';
+        this.ctx.font = '12px Courier New';
+        this.ctx.fillText('↑', 45, 160);
+        this.ctx.fillText('↓', 345, 160);
+        
+        this.ctx.shadowBlur = 0;
+    }
+    
+    drawBallLock(ballLock) {
+        // Draw lock housing
+        this.ctx.fillStyle = ballLock.active ? 'rgba(255, 0, 255, 0.3)' : 'rgba(128, 0, 128, 0.2)';
+        this.ctx.fillRect(ballLock.x, ballLock.y, ballLock.width, ballLock.height);
+        
+        this.ctx.strokeStyle = ballLock.active ? '#ff00ff' : '#800080';
+        this.ctx.lineWidth = 3;
+        this.ctx.shadowColor = '#ff00ff';
+        this.ctx.shadowBlur = ballLock.active ? 15 : 0;
+        this.ctx.strokeRect(ballLock.x, ballLock.y, ballLock.width, ballLock.height);
+        
+        // Draw locked balls
+        this.ctx.fillStyle = '#00ffff';
+        ballLock.locked.forEach(ball => {
+            this.ctx.beginPath();
+            this.ctx.arc(ball.x, ball.y, 6, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+        
+        // Draw capacity indicator
+        this.ctx.fillStyle = ballLock.active ? '#ff00ff' : '#666666';
+        this.ctx.font = '10px Courier New';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`${ballLock.locked.length}/3`, ballLock.x + ballLock.width/2, ballLock.y - 5);
+        
+        this.ctx.shadowBlur = 0;
+        this.ctx.textAlign = 'left';
+    }
+    
+    drawCaptiveBall(captiveBall) {
+        // Draw lane
+        this.ctx.strokeStyle = '#666666';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(captiveBall.laneLeft, captiveBall.laneTop);
+        this.ctx.lineTo(captiveBall.laneLeft, captiveBall.laneBottom);
+        this.ctx.moveTo(captiveBall.laneRight, captiveBall.laneTop);
+        this.ctx.lineTo(captiveBall.laneRight, captiveBall.laneBottom);
+        this.ctx.stroke();
+        
+        // Draw captive ball
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.strokeStyle = '#ffff00';
+        this.ctx.shadowColor = '#ffff00';
+        this.ctx.shadowBlur = 10;
+        
+        this.ctx.beginPath();
+        this.ctx.arc(captiveBall.x, captiveBall.currentY, captiveBall.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Draw hit counter
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.font = '10px Courier New';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(captiveBall.hits.toString(), captiveBall.x, captiveBall.laneTop - 5);
+        
+        this.ctx.shadowBlur = 0;
+        this.ctx.textAlign = 'left';
+    }
 }

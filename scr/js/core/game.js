@@ -47,8 +47,15 @@ export class Game {
             spinners: JSON.parse(JSON.stringify(ELEMENTS.spinners)),
             outlanes: JSON.parse(JSON.stringify(ELEMENTS.outlanes)),
             inlanes: JSON.parse(JSON.stringify(ELEMENTS.inlanes)),
-            ramps: JSON.parse(JSON.stringify(ELEMENTS.ramps))
+            ramps: JSON.parse(JSON.stringify(ELEMENTS.ramps)),
+            upperLoop: JSON.parse(JSON.stringify(ELEMENTS.upperLoop)),
+            ballLock: JSON.parse(JSON.stringify(ELEMENTS.ballLock)),
+            captiveBall: JSON.parse(JSON.stringify(ELEMENTS.captiveBall))
         };
+        
+        // Multi-ball tracking
+        this.balls = [this.ball];
+        this.multiballActive = false;
         
         this.setupInputHandlers();
         this.setupPhysicsCallbacks();
@@ -202,6 +209,37 @@ export class Game {
                         });
                     }
                     break;
+                case 'loopEnter':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ffff', 1.0);
+                    this.audioManager.play('ramp-hit', {
+                        volume: 1.0,
+                        pitch: 1.3
+                    });
+                    this.elements.upperLoop.active = true;
+                    break;
+                case 'ballLocked':
+                    this.particleSystem.createCollisionEffect(x, y, '#ff00ff', 1.0);
+                    this.audioManager.play('target-hit', {
+                        volume: 1.0,
+                        pitch: 0.8
+                    });
+                    // Check if ready for multiball
+                    if (this.elements.ballLock.locked.length >= 3 && !this.multiballActive) {
+                        this.startMultiball();
+                    }
+                    break;
+                case 'captiveBallHit':
+                    this.particleSystem.createCollisionEffect(x, y, '#ffff00', 0.8);
+                    this.audioManager.play('bumper-hit', {
+                        volume: 0.8,
+                        pitch: 1.0
+                    });
+                    // Activate ball lock after 5 captive ball hits
+                    if (element.hits >= 5 && !this.elements.ballLock.active) {
+                        this.elements.ballLock.active = true;
+                        this.particleSystem.createCollisionEffect(this.elements.ballLock.x + 20, this.elements.ballLock.y + 30, '#ff00ff', 2.0);
+                    }
+                    break;
             }
         });
     }
@@ -335,6 +373,14 @@ export class Game {
                 this.elements.inlanes.forEach(lane => {
                     this.physics.checkLaneCollision(this.ball, lane);
                 });
+                
+                // Phase 2 elements
+                this.elements.upperLoop.segments.forEach(segment => {
+                    this.physics.checkUpperLoopCollision(this.ball, segment);
+                });
+                
+                this.physics.checkBallLockCollision(this.ball, this.elements.ballLock);
+                this.physics.checkCaptiveBallCollision(this.ball, this.elements.captiveBall);
             }
             
             // Update trail with final position
@@ -415,8 +461,56 @@ export class Game {
         // Update UI display
         this.uiDisplay.update();
         
+        // Update captive ball spring back
+        if (this.elements.captiveBall.currentY > this.elements.captiveBall.y) {
+            this.elements.captiveBall.currentY -= 1;
+        }
+        
+        // Check upper loop completion
+        if (this.elements.upperLoop.active) {
+            // Simple completion check - would need more sophisticated tracking
+            this.elements.upperLoop.completions++;
+            this.elements.upperLoop.active = false;
+            this.addScore(SCORING.LOOP_COMPLETE);
+            this.particleSystem.createCollisionEffect(350, 135, '#00ffff', 2.0);
+        }
+        
         // Update particle system
         this.particleSystem.update(1/60);
+    }
+    
+    startMultiball() {
+        this.multiballActive = true;
+        this.addScore(SCORING.MULTIBALL_START);
+        
+        // Release locked balls
+        const Ball = this.ball.constructor;
+        this.elements.ballLock.locked.forEach((pos, index) => {
+            setTimeout(() => {
+                const newBall = new Ball();
+                newBall.x = pos.x;
+                newBall.y = pos.y;
+                newBall.vx = -5 - Math.random() * 10;
+                newBall.vy = -10 - Math.random() * 5;
+                newBall.launched = true;
+                this.balls.push(newBall);
+            }, index * 500);
+        });
+        
+        this.elements.ballLock.locked = [];
+        this.elements.ballLock.active = false;
+        
+        // Big celebration effect
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                this.particleSystem.createCollisionEffect(
+                    100 + Math.random() * 200,
+                    200 + Math.random() * 200,
+                    '#ff00ff',
+                    2.0
+                );
+            }, i * 100);
+        }
     }
     
     draw() {
@@ -428,6 +522,11 @@ export class Game {
         // Draw new elements
         this.renderer.drawSkillLanes(this.elements.skillLanes);
         this.renderer.drawLaneDividers(this.elements.laneDividers);
+        
+        // Draw Phase 2 elements
+        this.renderer.drawUpperLoop(this.elements.upperLoop);
+        this.renderer.drawBallLock(this.elements.ballLock);
+        this.renderer.drawCaptiveBall(this.elements.captiveBall);
         
         // Check if ball is passing under outlanes (launcher area)
         const ballUnderBridge = this.ball.x >= 340 && this.ball.x <= 382 && 
@@ -450,9 +549,16 @@ export class Game {
         this.renderer.drawSpinners(this.elements.spinners);
         this.renderer.drawFlippers(this.flippers);
         
-        // Draw ball after outlanes if it's not passing under
+        // Draw main ball after outlanes if it's not passing under
         if (!ballUnderBridge) {
             this.renderer.drawBall(this.ball, this.input.isCharging());
+        }
+        
+        // Draw additional balls for multiball
+        for (let i = 1; i < this.balls.length; i++) {
+            if (this.balls[i] && !this.balls[i].locked) {
+                this.renderer.drawBall(this.balls[i], false);
+            }
         }
         
         // Draw particles

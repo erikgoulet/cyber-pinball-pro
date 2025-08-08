@@ -759,4 +759,124 @@ export class Physics {
         }
         return false;
     }
+    
+    checkUpperLoopCollision(ball, segment) {
+        // Line segment collision for loop segments
+        const lineLen = Math.sqrt((segment.x2 - segment.x1) ** 2 + (segment.y2 - segment.y1) ** 2);
+        if (lineLen === 0) return false;
+        
+        const t = Math.max(0, Math.min(1, ((ball.x - segment.x1) * (segment.x2 - segment.x1) + (ball.y - segment.y1) * (segment.y2 - segment.y1)) / (lineLen * lineLen)));
+        const closestX = segment.x1 + t * (segment.x2 - segment.x1);
+        const closestY = segment.y1 + t * (segment.y2 - segment.y1);
+        
+        const dist = Math.sqrt((ball.x - closestX) ** 2 + (ball.y - closestY) ** 2);
+        
+        if (dist < ball.radius + segment.width / 2) {
+            // Check if ball is entering from correct direction
+            if (segment.type === 'entrance' && ball.vy < 0) {
+                // Ball entering loop - boost speed
+                ball.vy *= 1.5;
+                ball.vx *= 1.5;
+                this.addScore(SCORING.LOOP_ENTER || 100);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('loopEnter', closestX, closestY, segment);
+                }
+                return true;
+            }
+            
+            // Guide ball along loop
+            const normalX = (ball.x - closestX) / dist;
+            const normalY = (ball.y - closestY) / dist;
+            
+            ball.x = closestX + normalX * (ball.radius + segment.width / 2);
+            ball.y = closestY + normalY * (ball.radius + segment.width / 2);
+            
+            // Maintain speed in loop
+            const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+            const minSpeed = 15;
+            if (speed < minSpeed) {
+                const boost = minSpeed / speed;
+                ball.vx *= boost;
+                ball.vy *= boost;
+            }
+            
+            // Apply curve physics for curved segments
+            if (segment.type === 'curve') {
+                const dot = ball.vx * normalX + ball.vy * normalY;
+                ball.vx = (ball.vx - 2 * dot * normalX) * 1.05;
+                ball.vy = (ball.vy - 2 * dot * normalY) * 1.05;
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+    checkBallLockCollision(ball, ballLock) {
+        if (!ballLock.active) return false;
+        
+        if (ball.x + ball.radius > ballLock.x &&
+            ball.x - ball.radius < ballLock.x + ballLock.width &&
+            ball.y + ball.radius > ballLock.y &&
+            ball.y - ball.radius < ballLock.y + ballLock.height) {
+            
+            // Lock the ball
+            if (ballLock.locked.length < ballLock.capacity) {
+                ballLock.locked.push({
+                    x: ballLock.x + ballLock.width / 2,
+                    y: ballLock.y + 20 + (ballLock.locked.length * 15)
+                });
+                
+                this.addScore(SCORING.BALL_LOCKED || 500);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('ballLocked', ball.x, ball.y, ballLock);
+                }
+                
+                // Mark ball for removal
+                ball.locked = true;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    checkCaptiveBallCollision(ball, captiveBall) {
+        const dx = ball.x - captiveBall.x;
+        const dy = ball.y - captiveBall.currentY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < ball.radius + captiveBall.radius) {
+            // Push captive ball
+            const pushForce = 5;
+            captiveBall.currentY += pushForce;
+            
+            // Constrain to lane
+            if (captiveBall.currentY + captiveBall.radius > captiveBall.laneBottom) {
+                captiveBall.currentY = captiveBall.laneBottom - captiveBall.radius;
+                captiveBall.hits++;
+                
+                this.addScore(SCORING.CAPTIVE_BALL_HIT || 150);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('captiveBallHit', captiveBall.x, captiveBall.currentY, captiveBall);
+                }
+            }
+            
+            // Bounce main ball back
+            const normalX = dx / dist;
+            const normalY = dy / dist;
+            
+            ball.x = captiveBall.x + normalX * (ball.radius + captiveBall.radius);
+            ball.y = captiveBall.currentY + normalY * (ball.radius + captiveBall.radius);
+            
+            const dot = ball.vx * normalX + ball.vy * normalY;
+            ball.vx = (ball.vx - 2 * dot * normalX) * 0.8;
+            ball.vy = (ball.vy - 2 * dot * normalY) * 0.8;
+            
+            return true;
+        }
+        return false;
+    }
 }

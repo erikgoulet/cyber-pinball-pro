@@ -100,6 +100,49 @@ export const ELEMENTS = {
         { x1: 350, y1: 550, x2: 250, y2: 480, width: 12 }
     ],
     
+    // New: Upper loop system
+    upperLoop: {
+        segments: [
+            // Left entrance
+            { x1: 50, y1: 150, x2: 50, y2: 120, width: 15, type: 'entrance' },
+            // Top curve segments (approximated with lines)
+            { x1: 50, y1: 120, x2: 80, y2: 100, width: 15, type: 'curve' },
+            { x1: 80, y1: 100, x2: 120, y2: 90, width: 15, type: 'curve' },
+            { x1: 120, y1: 90, x2: 200, y2: 85, width: 15, type: 'straight' },
+            { x1: 200, y1: 85, x2: 280, y2: 90, width: 15, type: 'straight' },
+            { x1: 280, y1: 90, x2: 320, y2: 100, width: 15, type: 'curve' },
+            { x1: 320, y1: 100, x2: 350, y2: 120, width: 15, type: 'curve' },
+            // Right exit
+            { x1: 350, y1: 120, x2: 350, y2: 150, width: 15, type: 'exit' }
+        ],
+        active: false,
+        completions: 0
+    },
+    
+    // New: Ball lock mechanism
+    ballLock: {
+        x: 200,
+        y: 350,
+        width: 40,
+        height: 60,
+        capacity: 3,
+        locked: [],
+        active: false
+    },
+    
+    // New: Captive ball
+    captiveBall: {
+        x: 320,
+        y: 380,
+        radius: 8,
+        laneTop: 360,
+        laneBottom: 400,
+        laneLeft: 310,
+        laneRight: 330,
+        hits: 0,
+        currentY: 380
+    },
+    
     flippers: {
         left: {
             x: 100,
