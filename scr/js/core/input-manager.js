@@ -9,6 +9,8 @@ export class InputManager {
             leftFlipperUp: null,
             rightFlipperDown: null,
             rightFlipperUp: null,
+            bothFlippersDown: null,
+            bothFlippersUp: null,
             chargeStart: null,
             chargeRelease: null
         };
@@ -61,12 +63,20 @@ export class InputManager {
         if (this.callbacks.leftFlipperDown) {
             this.callbacks.leftFlipperDown();
         }
+        // Check for both flippers
+        if (this.rightFlipperActive && this.callbacks.bothFlippersDown) {
+            this.callbacks.bothFlippersDown();
+        }
     }
     
     handleLeftFlipperUp() {
         this.leftFlipperActive = false;
         if (this.callbacks.leftFlipperUp) {
             this.callbacks.leftFlipperUp();
+        }
+        // Check for both flippers release
+        if (!this.rightFlipperActive && this.callbacks.bothFlippersUp) {
+            this.callbacks.bothFlippersUp();
         }
     }
     
@@ -75,12 +85,20 @@ export class InputManager {
         if (this.callbacks.rightFlipperDown) {
             this.callbacks.rightFlipperDown();
         }
+        // Check for both flippers
+        if (this.leftFlipperActive && this.callbacks.bothFlippersDown) {
+            this.callbacks.bothFlippersDown();
+        }
     }
     
     handleRightFlipperUp() {
         this.rightFlipperActive = false;
         if (this.callbacks.rightFlipperUp) {
             this.callbacks.rightFlipperUp();
+        }
+        // Check for both flippers release
+        if (!this.leftFlipperActive && this.callbacks.bothFlippersUp) {
+            this.callbacks.bothFlippersUp();
         }
     }
     

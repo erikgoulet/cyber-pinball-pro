@@ -538,4 +538,156 @@ export class Renderer {
         this.ctx.shadowBlur = 0;
         this.ctx.textAlign = 'left';
     }
+    
+    drawMiniFlipper(flipper) {
+        this.ctx.save();
+        this.ctx.translate(flipper.x, flipper.y);
+        this.ctx.rotate(flipper.angle);
+        
+        this.ctx.strokeStyle = '#ff00ff';
+        this.ctx.lineWidth = 6;
+        this.ctx.lineCap = 'round';
+        this.ctx.shadowColor = '#ff00ff';
+        this.ctx.shadowBlur = 10;
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(flipper.length, 0);
+        this.ctx.stroke();
+        
+        // Draw pivot
+        this.ctx.fillStyle = '#ff00ff';
+        this.ctx.beginPath();
+        this.ctx.arc(0, 0, 6, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        this.ctx.restore();
+        this.ctx.shadowBlur = 0;
+    }
+    
+    drawMagnets(magnets) {
+        magnets.forEach(magnet => {
+            if (magnet.active) {
+                // Draw magnetic field
+                this.ctx.strokeStyle = magnet.type === 'attract' ? '#0088ff' : '#ff0088';
+                this.ctx.lineWidth = 2;
+                this.ctx.globalAlpha = 0.3;
+                
+                for (let i = 1; i <= 3; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(magnet.x, magnet.y, magnet.radius * (i / 3), 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
+                
+                this.ctx.globalAlpha = 1;
+            }
+            
+            // Draw magnet center
+            this.ctx.fillStyle = magnet.active ? 
+                (magnet.type === 'attract' ? '#0088ff' : '#ff0088') : '#444444';
+            this.ctx.beginPath();
+            this.ctx.arc(magnet.x, magnet.y, 10, 0, Math.PI * 2);
+            this.ctx.fill();
+        });
+    }
+    
+    drawMovingTargets(targets) {
+        targets.forEach(target => {
+            this.ctx.fillStyle = target.hit ? 'rgba(0, 255, 0, 0.3)' : 'rgba(0, 255, 0, 0.8)';
+            this.ctx.fillRect(target.x, target.y, target.width, target.height);
+            
+            this.ctx.strokeStyle = target.hit ? '#666666' : '#00ff00';
+            this.ctx.lineWidth = 2;
+            this.ctx.shadowColor = '#00ff00';
+            this.ctx.shadowBlur = target.hit ? 0 : 10;
+            this.ctx.strokeRect(target.x, target.y, target.width, target.height);
+            
+            // Draw movement indicator
+            this.ctx.fillStyle = '#00ff00';
+            this.ctx.font = '8px Courier New';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('◄►', target.x + target.width/2, target.y + target.height/2);
+            
+            this.ctx.shadowBlur = 0;
+            this.ctx.textAlign = 'left';
+        });
+    }
+    
+    drawComplexRamps(ramps) {
+        Object.values(ramps).forEach(ramp => {
+            const color = ramp.active ? '#00ffff' : '#006666';
+            this.ctx.strokeStyle = color;
+            this.ctx.lineWidth = ramp.active ? 6 : 4;
+            this.ctx.shadowColor = '#00ffff';
+            this.ctx.shadowBlur = ramp.active ? 15 : 5;
+            
+            // Draw entrance
+            this.ctx.beginPath();
+            this.ctx.moveTo(ramp.entrance.x1, ramp.entrance.y1);
+            this.ctx.lineTo(ramp.entrance.x2, ramp.entrance.y2);
+            this.ctx.stroke();
+            
+            // Draw segments
+            ramp.segments.forEach(segment => {
+                this.ctx.beginPath();
+                this.ctx.moveTo(segment.x1, segment.y1);
+                this.ctx.lineTo(segment.x2, segment.y2);
+                this.ctx.stroke();
+            });
+            
+            // Draw exit indicator
+            this.ctx.fillStyle = color;
+            this.ctx.beginPath();
+            this.ctx.arc(ramp.exit.x, ramp.exit.y, 8, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            this.ctx.shadowBlur = 0;
+        });
+    }
+    
+    drawSpecialModes(modes) {
+        let y = 120;
+        this.ctx.font = 'bold 14px Courier New';
+        
+        Object.entries(modes).forEach(([mode, data]) => {
+            if (data.active) {
+                this.ctx.fillStyle = '#ffff00';
+                this.ctx.shadowColor = '#ffff00';
+                this.ctx.shadowBlur = 10;
+                
+                let text = '';
+                switch(mode) {
+                    case 'magnetMadness':
+                        text = 'MAGNET MADNESS!';
+                        break;
+                    case 'targetFrenzy':
+                        text = 'TARGET FRENZY 2X!';
+                        break;
+                    case 'superJackpot':
+                        text = `JACKPOT ${data.multiplier}X!`;
+                        break;
+                }
+                
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(text, 200, y);
+                y += 20;
+                
+                // Draw timer bar if applicable
+                if (data.duration !== undefined && data.maxDuration) {
+                    const barWidth = 100;
+                    const barHeight = 4;
+                    const progress = data.duration / data.maxDuration;
+                    
+                    this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+                    this.ctx.fillRect(150, y - 15, barWidth, barHeight);
+                    
+                    this.ctx.fillStyle = '#ffff00';
+                    this.ctx.fillRect(150, y - 15, barWidth * progress, barHeight);
+                }
+                
+                this.ctx.shadowBlur = 0;
+                this.ctx.textAlign = 'left';
+            }
+        });
+    }
 }

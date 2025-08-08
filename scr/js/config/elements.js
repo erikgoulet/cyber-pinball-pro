@@ -143,6 +143,84 @@ export const ELEMENTS = {
         currentY: 380
     },
     
+    // New: Mini flipper
+    miniFlipper: {
+        x: 280,
+        y: 350,
+        angle: Math.PI - 0.7,
+        length: 40,
+        targetAngle: Math.PI - 0.7,
+        activeAngle: Math.PI + 0.2,
+        isActive: false
+    },
+    
+    // New: Magnets under playfield
+    magnets: [
+        { x: 150, y: 300, radius: 40, strength: 0.5, active: false, type: 'attract' },
+        { x: 250, y: 400, radius: 40, strength: 0.5, active: false, type: 'repel' }
+    ],
+    
+    // New: Moving targets
+    movingTargets: [
+        { 
+            x: 100, 
+            y: 200, 
+            width: 30, 
+            height: 20, 
+            baseX: 100,
+            baseY: 200,
+            moveRadius: 30,
+            moveSpeed: 0.02,
+            moveAngle: 0,
+            hit: false,
+            points: 750
+        },
+        {
+            x: 300,
+            y: 250,
+            width: 30,
+            height: 20,
+            baseX: 300,
+            baseY: 250,
+            moveRadius: 20,
+            moveSpeed: 0.03,
+            moveAngle: Math.PI,
+            hit: false,
+            points: 750
+        }
+    ],
+    
+    // New: Complex ramp system
+    complexRamps: {
+        leftRamp: {
+            entrance: { x1: 70, y1: 500, x2: 120, y2: 450, width: 15 },
+            segments: [
+                { x1: 120, y1: 450, x2: 150, y2: 350, width: 15 },
+                { x1: 150, y1: 350, x2: 200, y2: 300, width: 15 },
+                { x1: 200, y1: 300, x2: 280, y2: 280, width: 15 }
+            ],
+            exit: { x: 280, y: 280, vx: 5, vy: 5 },
+            active: false
+        },
+        rightRamp: {
+            entrance: { x1: 330, y1: 500, x2: 280, y2: 450, width: 15 },
+            segments: [
+                { x1: 280, y1: 450, x2: 250, y2: 350, width: 15 },
+                { x1: 250, y1: 350, x2: 200, y2: 300, width: 15 },
+                { x1: 200, y1: 300, x2: 120, y2: 280, width: 15 }
+            ],
+            exit: { x: 120, y: 280, vx: -5, vy: 5 },
+            active: false
+        }
+    },
+    
+    // New: Special modes
+    specialModes: {
+        magnetMadness: { active: false, duration: 0, maxDuration: 10000 },
+        targetFrenzy: { active: false, duration: 0, maxDuration: 15000 },
+        superJackpot: { active: false, multiplier: 1 }
+    },
+    
     flippers: {
         left: {
             x: 100,

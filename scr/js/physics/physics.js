@@ -879,4 +879,137 @@ export class Physics {
         }
         return false;
     }
+    
+    checkMagnetEffect(ball, magnet) {
+        if (!magnet.active) return;
+        
+        const dx = ball.x - magnet.x;
+        const dy = ball.y - magnet.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < magnet.radius) {
+            const force = magnet.strength * (1 - dist / magnet.radius);
+            const fx = (dx / dist) * force;
+            const fy = (dy / dist) * force;
+            
+            if (magnet.type === 'attract') {
+                ball.vx -= fx;
+                ball.vy -= fy;
+            } else {
+                ball.vx += fx;
+                ball.vy += fy;
+            }
+        }
+    }
+    
+    checkMovingTargetCollision(ball, target) {
+        if (target.hit) return false;
+        
+        if (ball.x + ball.radius > target.x &&
+            ball.x - ball.radius < target.x + target.width &&
+            ball.y + ball.radius > target.y &&
+            ball.y - ball.radius < target.y + target.height) {
+            
+            target.hit = true;
+            
+            // Bounce ball off target
+            const ballCenterX = ball.x;
+            const ballCenterY = ball.y;
+            const targetCenterX = target.x + target.width / 2;
+            const targetCenterY = target.y + target.height / 2;
+            
+            const overlapLeft = (ball.x + ball.radius) - target.x;
+            const overlapRight = (target.x + target.width) - (ball.x - ball.radius);
+            const overlapTop = (ball.y + ball.radius) - target.y;
+            const overlapBottom = (target.y + target.height) - (ball.y - ball.radius);
+            
+            const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+            
+            if (minOverlap === overlapLeft) {
+                ball.x = target.x - ball.radius;
+                ball.vx = -Math.abs(ball.vx) * 0.9;
+            } else if (minOverlap === overlapRight) {
+                ball.x = target.x + target.width + ball.radius;
+                ball.vx = Math.abs(ball.vx) * 0.9;
+            } else if (minOverlap === overlapTop) {
+                ball.y = target.y - ball.radius;
+                ball.vy = -Math.abs(ball.vy) * 0.9;
+            } else {
+                ball.y = target.y + target.height + ball.radius;
+                ball.vy = Math.abs(ball.vy) * 0.9;
+            }
+            
+            this.addScore(target.points || SCORING.MOVING_TARGET_HIT);
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('movingTarget', ballCenterX, ballCenterY, target);
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+    checkComplexRampCollision(ball, ramp) {
+        // Check entrance
+        const entrance = ramp.entrance;
+        const lineLen = Math.sqrt((entrance.x2 - entrance.x1) ** 2 + (entrance.y2 - entrance.y1) ** 2);
+        const t = Math.max(0, Math.min(1, ((ball.x - entrance.x1) * (entrance.x2 - entrance.x1) + (ball.y - entrance.y1) * (entrance.y2 - entrance.y1)) / (lineLen * lineLen)));
+        const closestX = entrance.x1 + t * (entrance.x2 - entrance.x1);
+        const closestY = entrance.y1 + t * (entrance.y2 - entrance.y1);
+        const dist = Math.sqrt((ball.x - closestX) ** 2 + (ball.y - closestY) ** 2);
+        
+        if (dist < ball.radius + entrance.width / 2 && !ramp.active) {
+            // Check if entering from correct side
+            const entranceAngle = Math.atan2(entrance.y2 - entrance.y1, entrance.x2 - entrance.x1);
+            const ballAngle = Math.atan2(ball.vy, ball.vx);
+            const angleDiff = Math.abs(entranceAngle - ballAngle);
+            
+            if (angleDiff < Math.PI / 2) {
+                ramp.active = true;
+                ball.onRamp = true;
+                ball.rampSegment = 0;
+                
+                this.addScore(SCORING.COMPLEX_RAMP_ENTER || 200);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('complexRampEnter', closestX, closestY, ramp);
+                }
+                return true;
+            }
+        }
+        
+        // Guide ball along ramp segments if active
+        if (ramp.active && ball.onRamp) {
+            if (ball.rampSegment < ramp.segments.length) {
+                const segment = ramp.segments[ball.rampSegment];
+                // Simplified - move ball along segment
+                const progress = 0.1;
+                ball.x += (segment.x2 - segment.x1) * progress;
+                ball.y += (segment.y2 - segment.y1) * progress;
+                
+                // Check if reached end of segment
+                const segDist = Math.sqrt((ball.x - segment.x2) ** 2 + (ball.y - segment.y2) ** 2);
+                if (segDist < 10) {
+                    ball.rampSegment++;
+                }
+            } else {
+                // Exit ramp
+                ball.x = ramp.exit.x;
+                ball.y = ramp.exit.y;
+                ball.vx = ramp.exit.vx;
+                ball.vy = ramp.exit.vy;
+                ball.onRamp = false;
+                ramp.active = false;
+                
+                this.addScore(SCORING.COMPLEX_RAMP_COMPLETE || 1000);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('complexRampComplete', ramp.exit.x, ramp.exit.y, ramp);
+                }
+            }
+        }
+        
+        return false;
+    }
 }

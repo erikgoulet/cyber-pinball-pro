@@ -33,7 +33,8 @@ export class Game {
         this.ball = new Ball();
         this.flippers = {
             left: new Flipper(ELEMENTS.flippers.left),
-            right: new Flipper(ELEMENTS.flippers.right)
+            right: new Flipper(ELEMENTS.flippers.right),
+            mini: new Flipper(ELEMENTS.miniFlipper)
         };
         
         // Deep copy game elements
@@ -50,7 +51,12 @@ export class Game {
             ramps: JSON.parse(JSON.stringify(ELEMENTS.ramps)),
             upperLoop: JSON.parse(JSON.stringify(ELEMENTS.upperLoop)),
             ballLock: JSON.parse(JSON.stringify(ELEMENTS.ballLock)),
-            captiveBall: JSON.parse(JSON.stringify(ELEMENTS.captiveBall))
+            captiveBall: JSON.parse(JSON.stringify(ELEMENTS.captiveBall)),
+            miniFlipper: JSON.parse(JSON.stringify(ELEMENTS.miniFlipper)),
+            magnets: JSON.parse(JSON.stringify(ELEMENTS.magnets)),
+            movingTargets: JSON.parse(JSON.stringify(ELEMENTS.movingTargets)),
+            complexRamps: JSON.parse(JSON.stringify(ELEMENTS.complexRamps)),
+            specialModes: JSON.parse(JSON.stringify(ELEMENTS.specialModes))
         };
         
         // Multi-ball tracking
@@ -86,6 +92,19 @@ export class Game {
         this.input.on('rightFlipperUp', () => {
             this.flippers.right.deactivate();
             this.audioManager.play('flipper-down', { volume: 0.6 });
+        });
+        
+        // Mini flipper control (both flippers together)
+        this.input.on('bothFlippersDown', () => {
+            if (this.gameRunning) {
+                this.flippers.mini.activate();
+                this.audioManager.play('flipper-up', { volume: 0.7, pitch: 1.2 });
+            }
+        });
+        
+        this.input.on('bothFlippersUp', () => {
+            this.flippers.mini.deactivate();
+            this.audioManager.play('flipper-down', { volume: 0.5, pitch: 1.2 });
         });
         
         this.input.on('chargeStart', () => {
@@ -240,6 +259,36 @@ export class Game {
                         this.particleSystem.createCollisionEffect(this.elements.ballLock.x + 20, this.elements.ballLock.y + 30, '#ff00ff', 2.0);
                     }
                     break;
+                case 'movingTarget':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ff00', 1.0);
+                    this.audioManager.play('target-hit', {
+                        volume: 0.9,
+                        pitch: 1.2
+                    });
+                    // Check for target frenzy activation
+                    const allHit = this.elements.movingTargets.every(t => t.hit);
+                    if (allHit && !this.elements.specialModes.targetFrenzy.active) {
+                        this.activateSpecialMode('targetFrenzy');
+                    }
+                    break;
+                case 'complexRampEnter':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ffff', 0.8);
+                    this.audioManager.play('ramp-hit', {
+                        volume: 0.8,
+                        pitch: 1.1
+                    });
+                    break;
+                case 'complexRampComplete':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ffff', 2.0);
+                    this.audioManager.play('ramp-hit', {
+                        volume: 1.0,
+                        pitch: 1.5
+                    });
+                    // Check for magnet madness activation
+                    if (!this.elements.specialModes.magnetMadness.active) {
+                        this.activateSpecialMode('magnetMadness');
+                    }
+                    break;
             }
         });
     }
@@ -312,6 +361,7 @@ export class Game {
         // Update flippers
         this.flippers.left.update();
         this.flippers.right.update();
+        this.flippers.mini.update();
         
         // Update ball physics (velocity only, not position)
         this.ball.update();
@@ -331,6 +381,7 @@ export class Game {
                 this.physics.checkWalls(this.ball);
                 this.physics.checkFlipperCollision(this.ball, this.flippers.left, true);
                 this.physics.checkFlipperCollision(this.ball, this.flippers.right, false);
+                this.physics.checkFlipperCollision(this.ball, this.flippers.mini, false);
                 
                 // Check element collisions
                 this.elements.bumpers.forEach(bumper => {
@@ -381,6 +432,21 @@ export class Game {
                 
                 this.physics.checkBallLockCollision(this.ball, this.elements.ballLock);
                 this.physics.checkCaptiveBallCollision(this.ball, this.elements.captiveBall);
+                
+                // Phase 3 elements
+                this.elements.magnets.forEach(magnet => {
+                    this.physics.checkMagnetEffect(this.ball, magnet);
+                });
+                
+                this.elements.movingTargets.forEach(target => {
+                    this.physics.checkMovingTargetCollision(this.ball, target);
+                });
+                
+                // Check complex ramps
+                if (!this.ball.onRamp) {
+                    this.physics.checkComplexRampCollision(this.ball, this.elements.complexRamps.leftRamp);
+                    this.physics.checkComplexRampCollision(this.ball, this.elements.complexRamps.rightRamp);
+                }
             }
             
             // Update trail with final position
@@ -466,6 +532,29 @@ export class Game {
             this.elements.captiveBall.currentY -= 1;
         }
         
+        // Update moving targets
+        this.elements.movingTargets.forEach(target => {
+            target.moveAngle += target.moveSpeed;
+            target.x = target.baseX + Math.cos(target.moveAngle) * target.moveRadius;
+            target.y = target.baseY + Math.sin(target.moveAngle) * target.moveRadius;
+            
+            // Reset hit after a delay
+            if (target.hit && Math.random() < 0.01) {
+                target.hit = false;
+            }
+        });
+        
+        // Update special modes
+        Object.entries(this.elements.specialModes).forEach(([mode, data]) => {
+            if (data.active && data.duration !== undefined) {
+                data.duration -= 16; // ~60fps
+                if (data.duration <= 0) {
+                    data.active = false;
+                    this.deactivateSpecialMode(mode);
+                }
+            }
+        });
+        
         // Check upper loop completion
         if (this.elements.upperLoop.active) {
             // Simple completion check - would need more sophisticated tracking
@@ -513,6 +602,54 @@ export class Game {
         }
     }
     
+    activateSpecialMode(mode) {
+        const modeData = this.elements.specialModes[mode];
+        modeData.active = true;
+        
+        switch(mode) {
+            case 'magnetMadness':
+                modeData.duration = modeData.maxDuration;
+                // Activate all magnets
+                this.elements.magnets.forEach(magnet => {
+                    magnet.active = true;
+                });
+                this.particleSystem.createCollisionEffect(200, 300, '#ff00ff', 3.0);
+                this.audioManager.play('target-hit', { volume: 1.0, pitch: 2.0 });
+                break;
+                
+            case 'targetFrenzy':
+                modeData.duration = modeData.maxDuration;
+                // Double points for targets
+                this.elements.specialModes.superJackpot.multiplier = 2;
+                this.particleSystem.createCollisionEffect(200, 200, '#00ff00', 3.0);
+                this.audioManager.play('spinner-hit', { volume: 1.0, pitch: 2.0 });
+                break;
+                
+            case 'superJackpot':
+                modeData.multiplier = 5;
+                this.addScore(SCORING.SPECIAL_MODE_BONUS);
+                this.particleSystem.createCollisionEffect(200, 400, '#ffff00', 3.0);
+                this.audioManager.play('ramp-hit', { volume: 1.0, pitch: 2.0 });
+                break;
+        }
+    }
+    
+    deactivateSpecialMode(mode) {
+        switch(mode) {
+            case 'magnetMadness':
+                // Deactivate all magnets
+                this.elements.magnets.forEach(magnet => {
+                    magnet.active = false;
+                });
+                break;
+                
+            case 'targetFrenzy':
+                // Reset multiplier
+                this.elements.specialModes.superJackpot.multiplier = 1;
+                break;
+        }
+    }
+    
     draw() {
         this.renderer.clear();
         this.renderer.drawGrid();
@@ -527,6 +664,12 @@ export class Game {
         this.renderer.drawUpperLoop(this.elements.upperLoop);
         this.renderer.drawBallLock(this.elements.ballLock);
         this.renderer.drawCaptiveBall(this.elements.captiveBall);
+        
+        // Draw Phase 3 elements
+        this.renderer.drawMagnets(this.elements.magnets);
+        this.renderer.drawMovingTargets(this.elements.movingTargets);
+        this.renderer.drawComplexRamps(this.elements.complexRamps);
+        this.renderer.drawSpecialModes(this.elements.specialModes);
         
         // Check if ball is passing under outlanes (launcher area)
         const ballUnderBridge = this.ball.x >= 340 && this.ball.x <= 382 && 
@@ -548,6 +691,7 @@ export class Game {
         this.renderer.drawBumpers(this.elements.bumpers);
         this.renderer.drawSpinners(this.elements.spinners);
         this.renderer.drawFlippers(this.flippers);
+        this.renderer.drawMiniFlipper(this.flippers.mini);
         
         // Draw main ball after outlanes if it's not passing under
         if (!ballUnderBridge) {
