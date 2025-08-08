@@ -319,4 +319,104 @@ export class Renderer {
         this.ctx.fillStyle = COLORS.PRIMARY;
         this.ctx.fillText('Score: ' + score, 200, 450);
     }
+    
+    drawDropTargets(targets) {
+        targets.forEach(target => {
+            if (!target.dropped) {
+                // Draw standing target
+                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+                this.ctx.fillRect(target.x, target.y, target.width, target.height);
+                
+                this.ctx.strokeStyle = '#00ff00';
+                this.ctx.lineWidth = 2;
+                this.ctx.shadowColor = '#00ff00';
+                this.ctx.shadowBlur = 10;
+                this.ctx.strokeRect(target.x, target.y, target.width, target.height);
+            } else {
+                // Draw dropped target (flat line)
+                this.ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(target.x, target.y + target.height);
+                this.ctx.lineTo(target.x + target.width, target.y + target.height);
+                this.ctx.stroke();
+            }
+            this.ctx.shadowBlur = 0;
+        });
+    }
+    
+    drawSkillLanes(lanes) {
+        lanes.forEach(lane => {
+            // Draw lane background
+            this.ctx.fillStyle = lane.lit ? 'rgba(255, 255, 0, 0.6)' : 'rgba(255, 255, 0, 0.1)';
+            this.ctx.fillRect(lane.x, lane.y, lane.width, lane.height);
+            
+            // Draw lane border
+            this.ctx.strokeStyle = lane.lit ? '#ffff00' : '#888800';
+            this.ctx.lineWidth = 2;
+            if (lane.lit) {
+                this.ctx.shadowColor = '#ffff00';
+                this.ctx.shadowBlur = 15;
+            }
+            this.ctx.strokeRect(lane.x, lane.y, lane.width, lane.height);
+            this.ctx.shadowBlur = 0;
+            
+            // Draw letter
+            this.ctx.fillStyle = lane.lit ? '#000000' : '#ffff00';
+            this.ctx.font = 'bold 20px Courier New';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText(lane.letter, lane.x + lane.width/2, lane.y + lane.height/2);
+        });
+    }
+    
+    drawLaneDividers(dividers) {
+        this.ctx.strokeStyle = '#666666';
+        this.ctx.lineWidth = 2;
+        
+        dividers.forEach(divider => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(divider.x1, divider.y1);
+            this.ctx.lineTo(divider.x2, divider.y2);
+            this.ctx.stroke();
+        });
+    }
+    
+    drawOutlanes(lanes) {
+        this.ctx.strokeStyle = '#ff0000';
+        this.ctx.lineWidth = 4;
+        this.ctx.shadowColor = '#ff0000';
+        this.ctx.shadowBlur = 10;
+        
+        lanes.forEach(lane => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(lane.x1, lane.y1);
+            this.ctx.lineTo(lane.x2, lane.y2);
+            this.ctx.stroke();
+            
+            // Draw danger indicator
+            this.ctx.fillStyle = '#ff0000';
+            this.ctx.font = '12px Courier New';
+            this.ctx.textAlign = 'center';
+            const midX = (lane.x1 + lane.x2) / 2;
+            const midY = (lane.y1 + lane.y2) / 2;
+            this.ctx.fillText('!', midX, midY);
+        });
+        this.ctx.shadowBlur = 0;
+    }
+    
+    drawInlanes(lanes) {
+        this.ctx.strokeStyle = '#00ff00';
+        this.ctx.lineWidth = 4;
+        this.ctx.shadowColor = '#00ff00';
+        this.ctx.shadowBlur = 5;
+        
+        lanes.forEach(lane => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(lane.x1, lane.y1);
+            this.ctx.lineTo(lane.x2, lane.y2);
+            this.ctx.stroke();
+        });
+        this.ctx.shadowBlur = 0;
+    }
 }

@@ -41,7 +41,12 @@ export class Game {
             bumpers: JSON.parse(JSON.stringify(ELEMENTS.bumpers)),
             angledBumpers: JSON.parse(JSON.stringify(ELEMENTS.angledBumpers)),
             targets: JSON.parse(JSON.stringify(ELEMENTS.targets)),
+            dropTargets: JSON.parse(JSON.stringify(ELEMENTS.dropTargets)),
+            skillLanes: JSON.parse(JSON.stringify(ELEMENTS.skillLanes)),
+            laneDividers: JSON.parse(JSON.stringify(ELEMENTS.laneDividers)),
             spinners: JSON.parse(JSON.stringify(ELEMENTS.spinners)),
+            outlanes: JSON.parse(JSON.stringify(ELEMENTS.outlanes)),
+            inlanes: JSON.parse(JSON.stringify(ELEMENTS.inlanes)),
             ramps: JSON.parse(JSON.stringify(ELEMENTS.ramps))
         };
         
@@ -174,6 +179,29 @@ export class Game {
                         pitch: 0.9 + Math.random() * 0.2
                     });
                     break;
+                case 'dropTarget':
+                    this.particleSystem.createCollisionEffect(x, y, '#00ff00', 0.8);
+                    this.audioManager.play('target-hit', {
+                        volume: 0.9,
+                        pitch: 0.7
+                    });
+                    break;
+                case 'skillLane':
+                    this.particleSystem.createCollisionEffect(x, y, '#ffff00', 0.5);
+                    this.audioManager.play('spinner-hit', {
+                        volume: 0.7,
+                        pitch: 1.2
+                    });
+                    break;
+                case 'lane':
+                    if (element.danger) {
+                        this.particleSystem.createCollisionEffect(x, y, '#ff0000', 0.3);
+                        this.audioManager.play('wall-hit', {
+                            volume: 0.5,
+                            pitch: 0.8
+                        });
+                    }
+                    break;
             }
         });
     }
@@ -283,6 +311,27 @@ export class Game {
                 this.elements.ramps.forEach(ramp => {
                     this.physics.checkRampCollision(this.ball, ramp);
                 });
+                
+                // Check new elements
+                this.elements.dropTargets.forEach(target => {
+                    this.physics.checkDropTargetCollision(this.ball, target);
+                });
+                
+                this.elements.skillLanes.forEach(lane => {
+                    this.physics.checkSkillLaneCollision(this.ball, lane);
+                });
+                
+                this.elements.laneDividers.forEach(divider => {
+                    this.physics.checkLaneDividerCollision(this.ball, divider);
+                });
+                
+                this.elements.outlanes.forEach(lane => {
+                    this.physics.checkLaneCollision(this.ball, lane);
+                });
+                
+                this.elements.inlanes.forEach(lane => {
+                    this.physics.checkLaneCollision(this.ball, lane);
+                });
             }
             
             // Update trail with final position
@@ -329,6 +378,37 @@ export class Game {
             if (bumper.hit > 0) bumper.hit--;
         });
         
+        // Check if all drop targets are dropped and reset them
+        if (this.elements.dropTargets.every(target => target.dropped)) {
+            // Reset all drop targets after a short delay
+            setTimeout(() => {
+                this.elements.dropTargets.forEach(target => {
+                    target.dropped = false;
+                });
+                // Bonus for completing all drop targets
+                this.addScore(1000);
+                this.particleSystem.createCollisionEffect(200, 200, '#00ff00', 1.0);
+                this.audioManager.play('target-hit', {
+                    volume: 1.0,
+                    pitch: 1.5
+                });
+            }, 500);
+        }
+        
+        // Check if all skill lanes are lit
+        if (this.elements.skillLanes.every(lane => lane.lit)) {
+            // Reset lanes and give bonus
+            this.elements.skillLanes.forEach(lane => {
+                lane.lit = false;
+            });
+            this.addScore(2000);
+            this.particleSystem.createCollisionEffect(200, 100, '#ffff00', 1.0);
+            this.audioManager.play('spinner-hit', {
+                volume: 1.0,
+                pitch: 1.8
+            });
+        }
+        
         // Update UI display
         this.uiDisplay.update();
         
@@ -341,8 +421,17 @@ export class Game {
         this.renderer.drawGrid();
         this.renderer.drawWalls();
         this.renderer.drawLauncherChute(this.ball, this.input.isCharging(), this.input.getChargePower());
+        
+        // Draw new elements
+        this.renderer.drawSkillLanes(this.elements.skillLanes);
+        this.renderer.drawLaneDividers(this.elements.laneDividers);
+        this.renderer.drawOutlanes(this.elements.outlanes);
+        this.renderer.drawInlanes(this.elements.inlanes);
+        
+        // Draw existing elements
         this.renderer.drawRamps(this.elements.ramps);
         this.renderer.drawTargets(this.elements.targets);
+        this.renderer.drawDropTargets(this.elements.dropTargets);
         this.renderer.drawAngledBumpers(this.elements.angledBumpers);
         this.renderer.drawBumpers(this.elements.bumpers);
         this.renderer.drawSpinners(this.elements.spinners);

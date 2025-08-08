@@ -568,4 +568,134 @@ export class Physics {
         
         return false;
     }
+    
+    checkDropTargetCollision(ball, target) {
+        if (!target.dropped &&
+            ball.x + ball.radius > target.x &&
+            ball.x - ball.radius < target.x + target.width &&
+            ball.y + ball.radius > target.y &&
+            ball.y - ball.radius < target.y + target.height) {
+            
+            target.dropped = true;
+            
+            // Determine bounce direction
+            const ballCenterX = ball.x;
+            const ballCenterY = ball.y;
+            const targetCenterX = target.x + target.width / 2;
+            const targetCenterY = target.y + target.height / 2;
+            
+            const overlapLeft = (ball.x + ball.radius) - target.x;
+            const overlapRight = (target.x + target.width) - (ball.x - ball.radius);
+            const overlapTop = (ball.y + ball.radius) - target.y;
+            const overlapBottom = (target.y + target.height) - (ball.y - ball.radius);
+            
+            const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+            
+            if (minOverlap === overlapLeft) {
+                ball.x = target.x - ball.radius;
+                ball.vx = -Math.abs(ball.vx) * 0.8;
+            } else if (minOverlap === overlapRight) {
+                ball.x = target.x + target.width + ball.radius;
+                ball.vx = Math.abs(ball.vx) * 0.8;
+            } else if (minOverlap === overlapTop) {
+                ball.y = target.y - ball.radius;
+                ball.vy = -Math.abs(ball.vy) * 0.8;
+            } else {
+                ball.y = target.y + target.height + ball.radius;
+                ball.vy = Math.abs(ball.vy) * 0.8;
+            }
+            
+            this.addScore(target.points || SCORING.DROP_TARGET_HIT);
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('dropTarget', ballCenterX, ballCenterY, target);
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+    checkSkillLaneCollision(ball, lane) {
+        if (ball.x + ball.radius > lane.x &&
+            ball.x - ball.radius < lane.x + lane.width &&
+            ball.y + ball.radius > lane.y &&
+            ball.y - ball.radius < lane.y + lane.height) {
+            
+            if (!lane.lit) {
+                lane.lit = true;
+                this.addScore(lane.points || SCORING.SKILL_LANE_HIT);
+                
+                if (this.collisionCallback) {
+                    this.collisionCallback('skillLane', ball.x, ball.y, lane);
+                }
+            }
+            
+            return true;
+        }
+        return false;
+    }
+    
+    checkLaneDividerCollision(ball, divider) {
+        // Line segment collision
+        const lineLen = Math.sqrt((divider.x2 - divider.x1) ** 2 + (divider.y2 - divider.y1) ** 2);
+        if (lineLen === 0) return false;
+        
+        const t = Math.max(0, Math.min(1, ((ball.x - divider.x1) * (divider.x2 - divider.x1) + (ball.y - divider.y1) * (divider.y2 - divider.y1)) / (lineLen * lineLen)));
+        const closestX = divider.x1 + t * (divider.x2 - divider.x1);
+        const closestY = divider.y1 + t * (divider.y2 - divider.y1);
+        
+        const dist = Math.sqrt((ball.x - closestX) ** 2 + (ball.y - closestY) ** 2);
+        
+        if (dist < ball.radius + 2) { // 2 pixel width for dividers
+            const normalX = (ball.x - closestX) / dist;
+            const normalY = (ball.y - closestY) / dist;
+            
+            ball.x = closestX + normalX * (ball.radius + 2);
+            ball.y = closestY + normalY * (ball.radius + 2);
+            
+            const dot = ball.vx * normalX + ball.vy * normalY;
+            ball.vx = (ball.vx - 2 * dot * normalX) * 0.9;
+            ball.vy = (ball.vy - 2 * dot * normalY) * 0.9;
+            
+            return true;
+        }
+        return false;
+    }
+    
+    checkLaneCollision(ball, lane) {
+        // Generic lane collision (outlanes and inlanes)
+        const lineLen = Math.sqrt((lane.x2 - lane.x1) ** 2 + (lane.y2 - lane.y1) ** 2);
+        if (lineLen === 0) return false;
+        
+        const t = Math.max(0, Math.min(1, ((ball.x - lane.x1) * (lane.x2 - lane.x1) + (ball.y - lane.y1) * (lane.y2 - lane.y1)) / (lineLen * lineLen)));
+        const closestX = lane.x1 + t * (lane.x2 - lane.x1);
+        const closestY = lane.y1 + t * (lane.y2 - lane.y1);
+        
+        const dist = Math.sqrt((ball.x - closestX) ** 2 + (ball.y - closestY) ** 2);
+        
+        if (dist < ball.radius + 4) { // 4 pixel width for lanes
+            const normalX = (ball.x - closestX) / dist;
+            const normalY = (ball.y - closestY) / dist;
+            
+            ball.x = closestX + normalX * (ball.radius + 4);
+            ball.y = closestY + normalY * (ball.radius + 4);
+            
+            const dot = ball.vx * normalX + ball.vy * normalY;
+            ball.vx = (ball.vx - 2 * dot * normalX) * 0.85;
+            ball.vy = (ball.vy - 2 * dot * normalY) * 0.85;
+            
+            // Add score for outlanes (danger zones)
+            if (lane.danger) {
+                this.addScore(SCORING.OUTLANE_HIT || 50);
+            }
+            
+            if (this.collisionCallback) {
+                this.collisionCallback('lane', closestX, closestY, lane);
+            }
+            
+            return true;
+        }
+        return false;
+    }
 }
