@@ -429,9 +429,9 @@ export class Game {
         this.renderer.drawSkillLanes(this.elements.skillLanes);
         this.renderer.drawLaneDividers(this.elements.laneDividers);
         
-        // Check if ball is passing under outlanes
+        // Check if ball is passing under outlanes (launcher area)
         const ballUnderBridge = this.ball.x >= 340 && this.ball.x <= 382 && 
-                               this.ball.y >= 480 && this.ball.vy < -5;
+                               this.ball.y >= 480;
         
         // Draw ball before outlanes if it's passing under
         if (ballUnderBridge) {

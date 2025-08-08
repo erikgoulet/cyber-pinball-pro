@@ -47,22 +47,26 @@ export class Physics {
                                 ball.y >= launcherTop && ball.y <= launcherBottom);
         
         if (inLauncherChute) {
-            // Constrain ball to launcher chute walls
-            if (ball.x - ball.radius < launcherLeft) {
-                ball.x = launcherLeft + ball.radius;
-                ball.vx = Math.abs(ball.vx) * 0.9;
+            // Only constrain to launcher if ball hasn't been launched yet
+            if (!ball.launched) {
+                // Constrain ball to launcher chute walls
+                if (ball.x - ball.radius < launcherLeft) {
+                    ball.x = launcherLeft + ball.radius;
+                    ball.vx = Math.abs(ball.vx) * 0.9;
+                }
+                if (ball.x + ball.radius > launcherRight) {
+                    ball.x = launcherRight - ball.radius;
+                    ball.vx = -Math.abs(ball.vx) * 0.9;
+                }
+                // Ball can only exit from top when not launched
+                if (ball.y + ball.radius > launcherBottom) {
+                    ball.y = launcherBottom - ball.radius;
+                    ball.vy = -Math.abs(ball.vy);
+                }
+                // Don't apply other wall physics when in launcher
+                return;
             }
-            if (ball.x + ball.radius > launcherRight) {
-                ball.x = launcherRight - ball.radius;
-                ball.vx = -Math.abs(ball.vx) * 0.9;
-            }
-            // Ball can only exit from top
-            if (ball.y + ball.radius > launcherBottom) {
-                ball.y = launcherBottom - ball.radius;
-                ball.vy = -Math.abs(ball.vy);
-            }
-            // Don't apply other wall physics when in launcher
-            return;
+            // If ball has been launched and is falling back, let it pass through
         }
         
         // CRITICAL: First enforce hard boundaries - ball can NEVER go outside these
@@ -176,9 +180,11 @@ export class Physics {
         // Right wall (below corner) - skip launcher chute area
         if (ball.y > rightCornerY && ball.x + ball.radius > rightX) {
             // Allow ball to pass through launcher chute opening
-            if (ball.y < launcherTop || ball.x < launcherLeft - 10) {
+            if (ball.launched && (ball.y < launcherTop || ball.x < launcherLeft - 10)) {
                 ball.x = rightX - ball.radius;
                 ball.vx = -Math.abs(ball.vx) * 0.9;
+            } else if (!ball.launched) {
+                // Don't apply wall collision for unlaunched ball in launcher area
             }
         }
         
@@ -696,12 +702,11 @@ export class Physics {
     }
     
     checkLaneCollision(ball, lane) {
-        // Skip collision if ball is in launcher area and moving upward (passing under)
+        // Skip collision if ball is in launcher area (both launching up and falling down)
         const inLauncherArea = ball.x >= 340 && ball.x <= 382 && ball.y >= 480;
-        const movingUpward = ball.vy < -5; // Significant upward velocity
         
-        if (inLauncherArea && movingUpward) {
-            // Ball passes under the lane when launching
+        if (inLauncherArea) {
+            // Ball passes through the lane area when in launcher zone
             return false;
         }
         
