@@ -26,8 +26,8 @@ export const BALL = {
     INITIAL_X: 365,  // Moved slightly left for better launch clearance
     INITIAL_Y: 720,  // Start at bottom of launcher chute
     TRAIL_LENGTH: 20,
-    LAUNCH_MIN_POWER: isMobile ? 15 : 18.75,   // Slightly lower launch power on mobile
-    LAUNCH_MAX_POWER: isMobile ? 35 : 45,       // Moderately lower max power on mobile
+    LAUNCH_MIN_POWER: isMobile ? 20 : 25,   // Increased for reliable launch
+    LAUNCH_MAX_POWER: isMobile ? 45 : 55,   // Increased to ensure ball reaches top
     MAX_CHARGE_TIME: 2500
 };
 

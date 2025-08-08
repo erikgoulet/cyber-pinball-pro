@@ -42,14 +42,32 @@ export class Physics {
         const rightCornerX = rightX - cornerRadius;
         const rightCornerY = topY + cornerRadius;
         
-        // Check if ball is in launcher chute
-        const inLauncherChute = (ball.x >= launcherLeft && ball.x <= launcherRight && 
-                                ball.y >= launcherTop && ball.y <= launcherBottom);
+        // Check if ball is in launcher chute horizontally
+        const inLauncherX = ball.x >= launcherLeft && ball.x <= launcherRight;
         
-        if (inLauncherChute) {
-            // Only constrain to launcher if ball hasn't been launched yet
-            if (!ball.launched) {
-                // Constrain ball to launcher chute walls
+        // Before launch, constrain ball to launcher
+        if (!ball.launched && inLauncherX && ball.y >= launcherTop) {
+            // Constrain to launcher walls
+            if (ball.x - ball.radius < launcherLeft) {
+                ball.x = launcherLeft + ball.radius;
+                ball.vx = Math.abs(ball.vx) * 0.9;
+            }
+            if (ball.x + ball.radius > launcherRight) {
+                ball.x = launcherRight - ball.radius;
+                ball.vx = -Math.abs(ball.vx) * 0.9;
+            }
+            // Keep at bottom before launch
+            if (ball.y + ball.radius > launcherBottom) {
+                ball.y = launcherBottom - ball.radius;
+                ball.vy = 0;
+            }
+            return; // Skip other wall checks
+        }
+        
+        // After launch, apply chute walls only while ascending in chute
+        if (ball.launched && inLauncherX && ball.y > launcherTop && ball.y < launcherBottom) {
+            // Only apply side walls if ball is moving up (launching)
+            if (ball.vy < 0) {
                 if (ball.x - ball.radius < launcherLeft) {
                     ball.x = launcherLeft + ball.radius;
                     ball.vx = Math.abs(ball.vx) * 0.9;
@@ -58,18 +76,13 @@ export class Physics {
                     ball.x = launcherRight - ball.radius;
                     ball.vx = -Math.abs(ball.vx) * 0.9;
                 }
-                // Ball can only exit from top when not launched
-                if (ball.y + ball.radius > launcherBottom) {
-                    ball.y = launcherBottom - ball.radius;
-                    ball.vy = -Math.abs(ball.vy);
-                }
-                // Don't apply other wall physics when in launcher
-                return;
-            } else if (ball.y > launcherTop && ball.y < launcherTop + 100 && ball.vy < 0) {
-                // Add a curve to the launch trajectory when exiting launcher
-                ball.vx -= 0.3; // Gradually curve left as ball exits
             }
-            // If ball has been launched and is falling back, let it pass through
+            // No constraints when falling back down
+        }
+        
+        // Add curve to trajectory as ball exits launcher
+        if (ball.launched && ball.vy < 0 && ball.y > launcherTop - 50 && ball.y < launcherTop + 50) {
+            ball.vx -= 0.2; // Gentle leftward curve on exit
         }
         
         // CRITICAL: First enforce hard boundaries - ball can NEVER go outside these
@@ -182,12 +195,11 @@ export class Physics {
         
         // Right wall (below corner) - skip launcher chute area
         if (ball.y > rightCornerY && ball.x + ball.radius > rightX) {
-            // Allow ball to pass through launcher chute opening
-            if (ball.launched && (ball.y < launcherTop || ball.x < launcherLeft - 10)) {
+            // Skip wall collision if ball is in launcher chute area
+            const inLauncherArea = ball.x >= launcherLeft - 10 && ball.x <= launcherRight + 10;
+            if (!inLauncherArea) {
                 ball.x = rightX - ball.radius;
                 ball.vx = -Math.abs(ball.vx) * 0.9;
-            } else if (!ball.launched) {
-                // Don't apply wall collision for unlaunched ball in launcher area
             }
         }
         
