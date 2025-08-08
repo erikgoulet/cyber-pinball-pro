@@ -423,6 +423,19 @@ export class Renderer {
             const midX = (lane.x1 + lane.x2) / 2;
             const midY = (lane.y1 + lane.y2) / 2;
             this.ctx.fillText('!', midX, midY);
+            
+            // Draw "bridge" indicator for right outlane where ball passes under
+            if (lane.x1 === 380) { // Right outlane
+                this.ctx.save();
+                this.ctx.strokeStyle = '#ff6666';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([4, 4]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(lane.x1 - 5, lane.y1 + 50);
+                this.ctx.lineTo(lane.x2 - 5, lane.y2 - 50);
+                this.ctx.stroke();
+                this.ctx.restore();
+            }
         });
         this.ctx.shadowBlur = 0;
     }

@@ -428,6 +428,16 @@ export class Game {
         // Draw new elements
         this.renderer.drawSkillLanes(this.elements.skillLanes);
         this.renderer.drawLaneDividers(this.elements.laneDividers);
+        
+        // Check if ball is passing under outlanes
+        const ballUnderBridge = this.ball.x >= 340 && this.ball.x <= 382 && 
+                               this.ball.y >= 480 && this.ball.vy < -5;
+        
+        // Draw ball before outlanes if it's passing under
+        if (ballUnderBridge) {
+            this.renderer.drawBall(this.ball, this.input.isCharging());
+        }
+        
         this.renderer.drawOutlanes(this.elements.outlanes);
         this.renderer.drawInlanes(this.elements.inlanes);
         
@@ -439,7 +449,11 @@ export class Game {
         this.renderer.drawBumpers(this.elements.bumpers);
         this.renderer.drawSpinners(this.elements.spinners);
         this.renderer.drawFlippers(this.flippers);
-        this.renderer.drawBall(this.ball, this.input.isCharging());
+        
+        // Draw ball after outlanes if it's not passing under
+        if (!ballUnderBridge) {
+            this.renderer.drawBall(this.ball, this.input.isCharging());
+        }
         
         // Draw particles
         this.particleSystem.draw(this.renderer.ctx);

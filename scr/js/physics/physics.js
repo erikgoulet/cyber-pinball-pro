@@ -696,6 +696,15 @@ export class Physics {
     }
     
     checkLaneCollision(ball, lane) {
+        // Skip collision if ball is in launcher area and moving upward (passing under)
+        const inLauncherArea = ball.x >= 340 && ball.x <= 382 && ball.y >= 480;
+        const movingUpward = ball.vy < -5; // Significant upward velocity
+        
+        if (inLauncherArea && movingUpward) {
+            // Ball passes under the lane when launching
+            return false;
+        }
+        
         // Generic lane collision (outlanes and inlanes)
         const lineLen = Math.sqrt((lane.x2 - lane.x1) ** 2 + (lane.y2 - lane.y1) ** 2);
         if (lineLen === 0) return false;
