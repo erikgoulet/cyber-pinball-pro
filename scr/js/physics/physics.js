@@ -65,6 +65,9 @@ export class Physics {
                 }
                 // Don't apply other wall physics when in launcher
                 return;
+            } else if (ball.y > launcherTop && ball.y < launcherTop + 100 && ball.vy < 0) {
+                // Add a curve to the launch trajectory when exiting launcher
+                ball.vx -= 0.3; // Gradually curve left as ball exits
             }
             // If ball has been launched and is falling back, let it pass through
         }

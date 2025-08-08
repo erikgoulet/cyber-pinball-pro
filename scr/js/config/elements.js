@@ -84,8 +84,8 @@ export const ELEMENTS = {
     outlanes: [
         // Left outlane
         { x1: 20, y1: 550, x2: 50, y2: 650, danger: true },
-        // Right outlane  
-        { x1: 380, y1: 550, x2: 350, y2: 650, danger: true }
+        // Right outlane - moved up to avoid launcher path
+        { x1: 380, y1: 480, x2: 350, y2: 600, danger: true }
     ],
     
     inlanes: [

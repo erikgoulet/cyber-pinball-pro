@@ -23,7 +23,7 @@ export const CANVAS = {
 // Ball configuration - also adaptive for mobile
 export const BALL = {
     RADIUS: 8,
-    INITIAL_X: 370,
+    INITIAL_X: 365,  // Moved slightly left for better launch clearance
     INITIAL_Y: 720,  // Start at bottom of launcher chute
     TRAIL_LENGTH: 20,
     LAUNCH_MIN_POWER: isMobile ? 15 : 18.75,   // Slightly lower launch power on mobile

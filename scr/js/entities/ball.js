@@ -44,8 +44,8 @@ export class Ball {
     launch(power) {
         // Launch upward from plunger
         this.vy = -power;
-        // Slight leftward angle for proper table entry
-        this.vx = -2 - (Math.random() * 2); // -2 to -4 for consistent leftward launch
+        // Stronger leftward angle to clear the right-side obstacles
+        this.vx = -8 - (Math.random() * 4); // -8 to -12 for stronger leftward launch
         this.launched = true;
     }
     
